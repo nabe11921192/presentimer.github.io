@@ -152,6 +152,6 @@ p.copyright {
 
 /* ✅ 開始ボタンの拡大 */
 #startButton {
-  transform: scale(3);
+  transform: scale(1);
   transform-origin: center;
 }
