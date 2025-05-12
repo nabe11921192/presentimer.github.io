@@ -81,3 +81,11 @@ li.wrap_item {
   font-size: 14px;
   list-style: decimal;
 }
+#startButton {
+  transform: scale(1.2);
+}
+
+#wrap {
+  transform: scale(2.5);
+  margin-top: 0.8em;
+}
