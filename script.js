@@ -282,36 +282,35 @@ window.addEventListener("load", () => {
 
 // ⏱ 自動停止する時間帯一覧（24時間制）
 const autoStopTimes = [
-  { start: "10:15", end: "10:25" },
-  { start: "12:15", end: "13:00" },
-  { start: "15:00", end: "15:10" },
-  { start: "17:10", end: "17:20" },
-  { start: "17:30", end: "17:40" }, // ✅ 追加された時間帯
-  { start: "19:20", end: "19:30" },
-  { start: "22:15", end: "22:25" },
-  { start: "00:15", end: "00:59" },
-  { start: "03:00", end: "03:10" },
-  { start: "05:10", end: "05:20" },
-  { start: "07:20", end: "07:30" },
+  { start: 10 * 60 + 15, end: 10 * 60 + 25 },  // 10:15〜10:25
+  { start: 12 * 60 + 15, end: 13 * 60 },       // 12:15〜13:00
+  { start: 15 * 60 + 0,  end: 15 * 60 + 10 },  // 15:00〜15:10
+  { start: 17 * 60 + 10, end: 17 * 60 + 20 },  // 17:10〜17:20
+  { start: 17 * 60 + 30, end: 17 * 60 + 40 },  // ✅ 17:30〜17:40 ←これ
+  { start: 19 * 60 + 20, end: 19 * 60 + 30 },
+  { start: 22 * 60 + 15, end: 22 * 60 + 25 },
+  { start: 0  * 60 + 15, end: 0  * 60 + 59 },
+  { start: 3  * 60 + 0,  end: 3  * 60 + 10 },
+  { start: 5  * 60 + 10, end: 5  * 60 + 20 },
+  { start: 7  * 60 + 20, end: 7  * 60 + 30 },
 ];
 
-// ⏹ 自動停止チェック（10秒ごとに実行）
+// ⏹ 自動停止チェック（10秒ごと）
 setInterval(() => {
   const now = new Date();
-  const hour = now.getHours();
-  const minute = now.getMinutes();
-  const nowStr = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-  const isWithinStopRange = autoStopTimes.some(({ start, end }) => {
-    return start <= nowStr && nowStr < end;
-  });
+  const isWithinStopRange = autoStopTimes.some(({ start, end }) =>
+    currentMinutes >= start && currentMinutes < end
+  );
 
   if (
     isWithinStopRange &&
-    !startBtn.disabled && // タイマー動作中
+    !startBtn.disabled && // タイマーが動いている
     !stopBtn.disabled     // まだ停止していない
   ) {
     stopTimer();
+    const nowStr = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
     alert(`現在の時間（${nowStr}）は自動停止時間帯です。`);
   }
-}, 10000); // 10秒おきにチェック
+}, 10000); // 10秒ごとに確認
