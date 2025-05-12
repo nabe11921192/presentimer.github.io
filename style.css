@@ -155,3 +155,12 @@ p.copyright {
   transform: scale(1);
   transform-origin: center;
 }
+#startButton {
+  transform: scale(1) !important;     /* ← 強制的に通常サイズに固定 */
+  transform-origin: center;
+}
+
+#wrap {
+  transform: scale(2);
+  transform-origin: center;
+}
