@@ -18,7 +18,6 @@ section#main {
 }
 
 div.inner {
-  /* width: 100%; */
   display: table-cell;
   vertical-align: middle;
 }
@@ -58,10 +57,10 @@ button {
   background: #fafafa;
   border-bottom: solid 4px #e0e0e0;
   border-radius: 3px;
+  margin: 0.2em;
 }
 
 button:active {
-  -webkit-transform: translateY(4px);
   transform: translateY(4px);
   border-bottom: none;
 }
@@ -80,6 +79,7 @@ td {
   padding-left: 8px;
   padding-right: 8px;
 }
+
 td.limit {
   text-align: left;
 }
@@ -148,4 +148,10 @@ footer {
 p.copyright {
   margin: 0px;
   padding: 10px;
+}
+
+/* ✅ 開始ボタンの拡大 */
+#startButton {
+  transform: scale(3);
+  transform-origin: center;
 }
