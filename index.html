@@ -16,25 +16,28 @@
     <script type="text/javascript" src="analytics.js"></script>
     <script type="text/javascript" src="./script.js" defer></script>
   </head>
+
   <body>
     <section id="main">
       <div class="inner">
         <p id="status">残り</p>
         <p id="timer"><span id="minutes">00</span>分 <span id="seconds">00</span>秒</p>
         <p id="elapsed_timer">
-          経過時間
-          <span id="elapsed_minutes">00</span>分 <span id="elapsed_seconds">00</span>秒
+          経過時間 <span id="elapsed_minutes">00</span>分 <span id="elapsed_seconds">00</span>秒
         </p>
       </div>
     </section>
+
     <section id="controller">
-      <button id="start">開始</button>
+      <!-- ✅ ボタンIDをstartButtonに修正 -->
+      <button id="startButton">開始</button>
       &emsp;
       <button id="stop">停止</button>
       &emsp;
       <button id="reset">リセット</button>
       &emsp;
       <button id="bell">手動用鈴</button>
+
       <table>
         <tr>
           <td>発表時間</td>
@@ -44,40 +47,37 @@
         </tr>
         <tr>
           <td>ベル１回</td>
-          <td>
-            <input type="tel" maxlength="3" placeholder="0" id="minutesPass1" name="1" />分経過
-          </td>
+          <td><input type="tel" maxlength="3" placeholder="0" id="minutesPass1" name="1" />分経過</td>
           <td>or</td>
           <td>残り<input type="tel" maxlength="3" placeholder="0" id="minutesRest1" />分</td>
         </tr>
         <tr>
           <td>ベル２回</td>
-          <td>
-            <input type="tel" maxlength="3" placeholder="0" id="minutesPass2" name="2" />分経過
-          </td>
+          <td><input type="tel" maxlength="3" placeholder="0" id="minutesPass2" name="2" />分経過</td>
           <td>or</td>
           <td>残り<input type="tel" maxlength="3" placeholder="0" id="minutesRest2" />分</td>
         </tr>
         <tr>
           <td>ベル３回</td>
-          <td>
-            <input type="tel" maxlength="3" placeholder="0" id="minutesPass3" name="3" />分経過
-          </td>
+          <td><input type="tel" maxlength="3" placeholder="0" id="minutesPass3" name="3" />分経過</td>
           <td>or</td>
           <td>残り<input type="tel" maxlength="3" placeholder="0" id="minutesRest3" />分</td>
         </tr>
       </table>
     </section>
+
     <section id="wrapWrapper">
       <h1>ラップタイム</h1>
       <ol id="wrapList"></ol>
       <button id="wrap">ラップ</button>
     </section>
+
     <section id="githubLinkWrapper">
       <a href="https://github.com/presentimer/presentimer.github.io" target="_blank">
         <img src="images/github-mark-white.svg" id="githubMarkSVG" />
       </a>
     </section>
+
     <footer>
       <p class="copyright">©︎ 2019-2024 kyome22, tkkrr</p>
     </footer>
