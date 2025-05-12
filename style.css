@@ -1,14 +1,14 @@
-body {
-  text-align: center;
+html, body {
+  height: 100%;
   margin: 0;
   padding: 0;
-  height: 100%;
+  text-align: center;
   background-color: #263238;
   color: white;
 }
 
 section#main {
-  height: calc(100% - 280px);
+  height: calc(100% - 200px);
   display: table;
   width: 100%;
 }
@@ -18,43 +18,37 @@ div.inner {
   vertical-align: middle;
 }
 
-p#status {
+#status {
   font-size: 60px;
+  margin: 0;
 }
 
-p#timer {
+#timer {
   font-size: 50px;
+  margin: 0;
 }
 
-p#elapsed_timer {
-  font-size: 16px;
-}
-
-span#minutes,
-span#seconds {
+#minutes, #seconds {
   font-size: 220px;
 }
 
-section#controller {
-  height: 210px;
-  font-size: 20px;
-  position: relative;
+#elapsed_timer {
+  font-size: 16px;
 }
 
-.button-area {
-  margin-top: 60px;
+#controller {
+  margin: 10px 0;
 }
 
 button {
-  display: inline-block;
   padding: 0.5em 1em;
-  width: 120px;
   font-size: 18px;
   color: #263238;
   background: #fafafa;
-  border-bottom: solid 4px #e0e0e0;
+  border: none;
   border-radius: 3px;
   margin: 0.2em;
+  cursor: pointer;
 }
 
 #wrap {
@@ -62,76 +56,28 @@ button {
   transform-origin: center;
 }
 
-#reset {
-  position: absolute;
-  left: 10px;
-  top: 10px;
-}
-
-button:active {
-  transform: translateY(4px);
-  border-bottom: none;
-}
-
-button:disabled {
-  color: #bdbdbd;
-  background: #e0e0e0;
-  border-bottom: solid 4px #9e9e9e;
-}
-
-#wrapWrapper {
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: 75vh;
-  width: 181px;
-  padding-right: 24px;
-}
-
-#wrapList {
-  height: 100%;
-  overflow-y: scroll;
-}
-
-#wrapList::-webkit-scrollbar {
-  width: 6px;
-}
-
-#wrapList::-webkit-scrollbar-thumb {
-  background-color: rgba(0.4, 0.4, 0.4, 0.4);
-  border-radius: 10px;
-}
-
-#wrapList::-webkit-scrollbar-track {
-  background-color: rgba(0.8, 0.8, 0.8, 0.1);
-  border-radius: 10px;
-}
-
-li.wrap_item {
-  padding-left: 5px;
-  margin-top: 4px;
-}
-
-/* リセットボタンを左上に配置 */
 .top-left {
   position: absolute;
   top: 10px;
   left: 10px;
 }
 
-/* ボタンを中央下部に配置 */
-.button-area {
-  margin-top: 40px;
+#wrapWrapper {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 200px;
+  height: auto;
+  text-align: left;
 }
 
-/* ボタンサイズ調整 */
-#startButton {
-  transform: scale(1.5);
-  transform-origin: center;
+ol#wrapList {
+  overflow-y: auto;
+  max-height: 70vh;
+  padding: 0 1em;
 }
 
-#wrap {
-  transform: scale(2.5);
-  transform-origin: center;
+li.wrap_item {
+  font-size: 14px;
+  list-style: decimal;
 }
-
