@@ -12,14 +12,15 @@ const wrapListDom = document.getElementById("wrapList");
 let timer;
 let startTime = 0;
 let passTime = 0;
-let wrapBackup = 0;
+let passBackup = 0;
 let wrapList = [];
 
 const zeroPadding = (num) => ("00" + num).slice(-2);
 
 const setupTimer = () => {
   passTime = 0;
-  wrapBackup = 0;
+  passBackup = 0;
+  timerPar.style.color = "white";
   minutesLbl.innerText = "00";
   secondsLbl.innerText = "00";
   elapsedMinutesLbl.innerText = "00";
@@ -27,15 +28,19 @@ const setupTimer = () => {
 };
 
 const getPassTime = () => {
-  return Math.floor((Date.now() - startTime) / 1000);
+  const currentTime = new Date().getTime();
+  return passBackup + Math.floor((currentTime - startTime) / 1000);
 };
 
 const countUp = () => {
   passTime = getPassTime();
-  minutesLbl.innerText = zeroPadding(Math.floor(passTime / 60));
-  secondsLbl.innerText = zeroPadding(passTime % 60);
-  elapsedMinutesLbl.innerText = zeroPadding(Math.floor(passTime / 60));
-  elapsedSecondsLbl.innerText = zeroPadding(passTime % 60);
+  const minutes = Math.floor(passTime / 60);
+  const seconds = passTime % 60;
+
+  minutesLbl.innerText = zeroPadding(minutes);
+  secondsLbl.innerText = zeroPadding(seconds);
+  elapsedMinutesLbl.innerText = zeroPadding(minutes);
+  elapsedSecondsLbl.innerText = zeroPadding(seconds);
 };
 
 const startTimer = () => {
@@ -43,40 +48,48 @@ const startTimer = () => {
   startBtn.disabled = true;
   resetBtn.disabled = false;
   wrapBtn.disabled = false;
-  startTime = Date.now() - passTime * 1000;
+
+  startTime = new Date().getTime();
   timer = setInterval(countUp, 100);
+};
+
+const stopTimer = () => {
+  clearInterval(timer);
+  passBackup = passTime;
+  startBtn.disabled = false;
+  wrapBtn.disabled = true;
 };
 
 const resetTimer = () => {
   clearInterval(timer);
-  timer = null;
-  startBtn.disabled = false;
-  resetBtn.disabled = true;
-  wrapBtn.disabled = true;
   setupTimer();
+
+  startBtn.disabled = false;
+  wrapBtn.disabled = true;
+  resetBtn.disabled = false;
+
+  // ラップリストを初期化
   wrapList = [];
-  while (wrapListDom.firstChild) wrapListDom.removeChild(wrapListDom.firstChild);
+  while (wrapListDom.firstChild) {
+    wrapListDom.removeChild(wrapListDom.firstChild);
+  }
 };
 
 const addWrap = () => {
-  const wrapTime = passTime - wrapBackup;
-  wrapBackup = passTime;
-  const wrapMinute = zeroPadding(Math.floor(wrapTime / 60));
-  const wrapSecond = zeroPadding(wrapTime % 60);
-  const wrapIndex = wrapList.length + 1;
-  const text = `${wrapIndex}回目 ${wrapMinute}分${wrapSecond}秒`;
+  const minutes = Math.floor(passTime / 60);
+  const seconds = passTime % 60;
+  const text = `${wrapList.length + 1}回目 ${zeroPadding(minutes)}分${zeroPadding(seconds)}秒`;
+
   const li = document.createElement("li");
   li.className = "wrap_item";
   li.textContent = text;
   wrapListDom.appendChild(li);
   wrapList.push(text);
-  minutesLbl.innerText = "00";
-  secondsLbl.innerText = "00";
 };
 
 window.addEventListener("load", () => {
+  setupTimer();
   startBtn.addEventListener("click", startTimer);
   resetBtn.addEventListener("click", resetTimer);
   wrapBtn.addEventListener("click", addWrap);
-  setupTimer();
 });
