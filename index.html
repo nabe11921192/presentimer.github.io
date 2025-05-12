@@ -7,22 +7,37 @@
     <script src="script.js" defer></script>
   </head>
   <body>
+    <!-- リセットボタンを左上に配置 -->
+    <button id="reset" class="top-left">リセット</button>
+
     <section id="main">
       <div class="inner">
         <p id="status">経過</p>
-        <p id="timer"><span id="minutes">00</span>分 <span id="seconds">00</span>秒</p>
-        <p id="elapsed_timer">経過時間 <span id="elapsed_minutes">00</span>分 <span id="elapsed_seconds">00</span>秒</p>
+        <p id="timer">
+          <span id="minutes">00</span>分
+          <span id="seconds">00</span>秒
+        </p>
+        <p id="elapsed_timer">
+          経過時間
+          <span id="elapsed_minutes">00</span>分
+          <span id="elapsed_seconds">00</span>秒
+        </p>
       </div>
     </section>
+
+    <!-- 中央下部の開始・ラップボタン -->
     <section id="controller">
-      <button id="reset">リセット</button>
-      <button id="startButton">開始</button>
-      <button id="wrap">ラップ</button>
+      <div class="button-area">
+        <button id="startButton">開始</button>
+        <button id="wrap">ラップ</button>
+      </div>
     </section>
+
     <section id="wrapWrapper">
       <h1>ラップタイム</h1>
       <ol id="wrapList"></ol>
     </section>
+
     <footer>
       <p class="copyright">© 2019-2024 kyome22, tkkrr</p>
     </footer>
