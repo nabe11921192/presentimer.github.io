@@ -41,6 +41,10 @@ section#controller {
   position: relative;
 }
 
+.button-area {
+  margin-top: 60px;
+}
+
 button {
   display: inline-block;
   padding: 0.5em 1em;
@@ -55,6 +59,7 @@ button {
 
 #wrap {
   transform: scale(2.5);
+  transform-origin: center;
 }
 
 #reset {
