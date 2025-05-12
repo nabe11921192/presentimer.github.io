@@ -112,3 +112,26 @@ li.wrap_item {
   margin-top: 4px;
 }
 
+/* リセットボタンを左上に配置 */
+.top-left {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+/* ボタンを中央下部に配置 */
+.button-area {
+  margin-top: 40px;
+}
+
+/* ボタンサイズ調整 */
+#startButton {
+  transform: scale(1.5);
+  transform-origin: center;
+}
+
+#wrap {
+  transform: scale(2.5);
+  transform-origin: center;
+}
+
