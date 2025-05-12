@@ -286,7 +286,7 @@ const autoStopTimes = [
   { start: 12 * 60 + 15, end: 13 * 60 },
   { start: 15 * 60 + 0,  end: 15 * 60 + 10 },
   { start: 17 * 60 + 10, end: 17 * 60 + 20 },
-  { start: 17 * 60 + 40, end: 17 * 60 + 50 },  // ✅ ←ここを修正！
+  { start: 17 * 60 + 45, end: 17 * 60 + 50 },  // ✅ 17:45〜17:50
   { start: 19 * 60 + 20, end: 19 * 60 + 30 },
   { start: 22 * 60 + 15, end: 22 * 60 + 25 },
   { start: 0  * 60 + 15, end: 0  * 60 + 59 },
@@ -295,24 +295,24 @@ const autoStopTimes = [
   { start: 7  * 60 + 20, end: 7  * 60 + 30 },
 ];
 
-];
-
-// ⏹ 自動停止チェック（10秒ごと）
+// ✅ 現在時刻を「分＋秒」で計算し、より正確に判定
 setInterval(() => {
   const now = new Date();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-  const isWithinStopRange = autoStopTimes.some(({ start, end }) =>
-    currentMinutes >= start && currentMinutes < end
-  );
+  const currentTotalSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+  
+  const isInStopRange = autoStopTimes.some(({ start, end }) => {
+    const startSec = start * 60;
+    const endSec = end * 60;
+    return currentTotalSeconds >= startSec && currentTotalSeconds < endSec;
+  });
 
   if (
-    isWithinStopRange &&
-    !startBtn.disabled && // タイマーが動いている
-    !stopBtn.disabled     // まだ停止していない
+    isInStopRange &&
+    typeof timer !== "undefined" &&
+    timer !== null
   ) {
     stopTimer();
-    const nowStr = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-    alert(`現在の時間（${nowStr}）は自動停止時間帯です。`);
+    console.log("⏹ 自動停止が実行されました");
+    alert("現在の時間帯は自動停止時間です。");
   }
-}, 10000); // 10秒ごとに確認
+}, 10000); // 10秒ごとチェック
