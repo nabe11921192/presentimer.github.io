@@ -279,3 +279,39 @@ window.addEventListener("load", () => {
   }
   limitField.addEventListener("input", updateLimit);
 });
+
+// ⏱ 自動停止する時間帯一覧（24時間制）
+const autoStopTimes = [
+  { start: "10:15", end: "10:25" },
+  { start: "12:15", end: "13:00" },
+  { start: "15:00", end: "15:10" },
+  { start: "17:10", end: "17:20" },
+  { start: "17:30", end: "17:40" }, // ✅ 追加された時間帯
+  { start: "19:20", end: "19:30" },
+  { start: "22:15", end: "22:25" },
+  { start: "00:15", end: "00:59" },
+  { start: "03:00", end: "03:10" },
+  { start: "05:10", end: "05:20" },
+  { start: "07:20", end: "07:30" },
+];
+
+// ⏹ 自動停止チェック（10秒ごとに実行）
+setInterval(() => {
+  const now = new Date();
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+  const nowStr = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+
+  const isWithinStopRange = autoStopTimes.some(({ start, end }) => {
+    return start <= nowStr && nowStr < end;
+  });
+
+  if (
+    isWithinStopRange &&
+    !startBtn.disabled && // タイマー動作中
+    !stopBtn.disabled     // まだ停止していない
+  ) {
+    stopTimer();
+    alert(`現在の時間（${nowStr}）は自動停止時間帯です。`);
+  }
+}, 10000); // 10秒おきにチェック
