@@ -6,7 +6,9 @@ const secondsLbl = document.getElementById("seconds");
 const elapsedMinutesLbl = document.getElementById("elapsed_minutes");
 const elapsedSecondsLbl = document.getElementById("elapsed_seconds");
 
-const startBtn = document.getElementById("start");
+// ✅ ID変更済み
+const startBtn = document.getElementById("startButton");
+
 const stopBtn = document.getElementById("stop");
 const resetBtn = document.getElementById("reset");
 const bellBtn = document.getElementById("bell");
@@ -22,13 +24,13 @@ const minRest3 = document.getElementById("minutesRest3");
 const minPassArray = [minPass1, minPass2, minPass3];
 const minRestArray = [minRest1, minRest2, minRest3];
 
-let minutes = [0, 0, 0]; // minutes
+let minutes = [0, 0, 0];
 let timer;
-let startTime = 0; // milli seconds 開始した時間
-let limitTime = 0; // minutes 発表時間（制限時間）
-let passTime = 0; // seconds 経過時間
-let passBackup = 0; // seconds 経過時間用のバックアップ
-let wrapBackup = 0; // seconds ラップ用のバックアップ
+let startTime = 0;
+let limitTime = 0;
+let passTime = 0;
+let passBackup = 0;
+let wrapBackup = 0;
 let wrapList = [];
 let wrapListDom = document.getElementById("wrapList");
 
@@ -47,12 +49,6 @@ const getQueries = () => {
   };
 };
 
-const setupValues = () => {
-  const queries = getQueries();
-  minutes = [queries.bell1, queries.bell2, queries.bell3];
-  limitTime = queries.limit;
-};
-
 const setQueries = () => {
   const queries = {
     limit: limitTime,
@@ -64,18 +60,19 @@ const setQueries = () => {
   history.replaceState(null, "", `?${params.toString()}`);
 };
 
-const minusPadding = (isMinus, num) => {
-  return (isMinus ? "-" : "") + num.toString();
-};
+const toHalfNumber = (text) =>
+  text.replace(/[０-９]/g, (s) =>
+    String.fromCharCode(s.charCodeAt(0) - 0xfee0)
+  );
 
-const zeroPadding = (num) => {
-  return ("00" + num).slice(-2);
-};
+const zeroPadding = (num) => ("00" + num).slice(-2);
+const minusPadding = (isMinus, num) =>
+  (isMinus ? "-" : "") + num.toString();
 
-const toHalfNumber = (text) => {
-  return text.replace(/[０-９]/g, (s) => {
-    return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-  });
+const setupValues = () => {
+  const queries = getQueries();
+  minutes = [queries.bell1, queries.bell2, queries.bell3];
+  limitTime = queries.limit;
 };
 
 const setupUI = () => {
@@ -117,16 +114,13 @@ const callSilentBell = () => {
   bell.play();
 };
 
-// seconds タイマー開始からの経過時間の取得
-// バックアップは一時停止したときの対応用
 const getPassTime = () => {
-  const currentTime = new Date().getTime(); // milli seconds
+  const currentTime = new Date().getTime();
   return passBackup + Math.floor((currentTime - startTime) / 1000);
 };
 
 const countDown = () => {
   const _passTime = getPassTime();
-
   if (_passTime != passTime) {
     for (let i = 2; i >= 0; i--) {
       if (minutes[i] > 0 && _passTime == minutes[i] * 60) {
@@ -139,7 +133,7 @@ const countDown = () => {
   }
 
   passTime = _passTime;
-  const restTime = limitTime * 60 - passTime; // seconds 残り時間
+  const restTime = limitTime * 60 - passTime;
   timerPar.style.color = restTime < 0 ? "#E64A19" : "white";
   minutesLbl.innerText = minusPadding(restTime < 0, Math.abs(parseInt(restTime / 60, 10)));
   secondsLbl.innerText = zeroPadding(Math.abs(restTime) % 60);
@@ -182,8 +176,6 @@ const resetTimer = () => {
   setupTimer();
   statusLbl.innerText = "残り";
   resetBtn.disabled = true;
-
-  // ラップタイムの初期化，およびラップタイムリストの配列，DOMリストを削除
   wrapTime = 0;
   wrapList = [];
   while (wrapListDom.firstChild) {
@@ -200,7 +192,7 @@ const callBell = () => {
 const addWrap = () => {
   if (startBtn.disabled == false) return;
 
-  const wrapTime = passTime - wrapBackup; // ラップ
+  const wrapTime = passTime - wrapBackup;
   const wrap_minute = zeroPadding(Math.abs(parseInt(wrapTime / 60, 10)));
   const wrap_second = zeroPadding(Math.abs(wrapTime) % 60);
   const _minute = elapsedMinutesLbl.innerText;
@@ -209,16 +201,13 @@ const addWrap = () => {
 
   const wrap = `${wrap_minute}:${wrap_second}（${_minute}:${_second}）`;
   const li = document.createElement("li");
-  const attr = document.createAttribute("class");
-  attr.value = "wrap_item";
-  li.setAttributeNode(attr);
-  li.appendChild(document.createTextNode(wrap));
+  li.className = "wrap_item";
+  li.textContent = wrap;
 
   wrapListDom.appendChild(li);
   wrapList.push(wrap);
 };
 
-// 経過のフィールドが更新されたとき発火
 const updatePass = () => {
   for (let i = 0; i < 3; i++) {
     let value = minPassArray[i].value;
@@ -239,7 +228,6 @@ const updatePass = () => {
   setQueries();
 };
 
-// 残りのフィールドが更新されたとき発火
 const updateRest = () => {
   for (let i = 0; i < 3; i++) {
     let value = minRestArray[i].value;
@@ -260,7 +248,6 @@ const updateRest = () => {
   setQueries();
 };
 
-// 発表時間のフィールドが更新されたとき発火
 const updateLimit = () => {
   let value = limitField.value;
   if (value) {
@@ -279,16 +266,16 @@ const updateLimit = () => {
 window.addEventListener("load", () => {
   setupValues();
   setupUI();
-  startBtn.addEventListener("click", startTimer, false);
-  stopBtn.addEventListener("click", stopTimer, false);
-  resetBtn.addEventListener("click", resetTimer, false);
-  bellBtn.addEventListener("click", callBell, false);
-  wrapBtn.addEventListener("click", addWrap, false);
+  startBtn.addEventListener("click", startTimer);
+  stopBtn.addEventListener("click", stopTimer);
+  resetBtn.addEventListener("click", resetTimer);
+  bellBtn.addEventListener("click", callBell);
+  wrapBtn.addEventListener("click", addWrap);
   for (let minPass of minPassArray) {
-    minPass.addEventListener("input", updatePass, false);
+    minPass.addEventListener("input", updatePass);
   }
   for (let minRest of minRestArray) {
-    minRest.addEventListener("input", updateRest, false);
+    minRest.addEventListener("input", updateRest);
   }
-  limitField.addEventListener("input", updateLimit, false);
+  limitField.addEventListener("input", updateLimit);
 });
