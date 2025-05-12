@@ -1,91 +1,94 @@
-html, body {
+html {
   height: 100%;
+}
+body {
+  text-align: center;
   margin: 0;
   padding: 0;
-  text-align: center;
+  height: 100%;
   background-color: #263238;
   color: white;
 }
-
 section#main {
-  height: calc(100% - 200px);
-  display: table;
+  height: calc(100% - 280px);
   width: 100%;
+  display: table;
 }
-
 div.inner {
   display: table-cell;
   vertical-align: middle;
 }
-
-#status {
+p#status {
+  margin: 0 auto;
   font-size: 60px;
-  margin: 0;
 }
-
-#timer {
+p#timer {
+  margin: 0 auto;
   font-size: 50px;
-  margin: 0;
 }
-
-#minutes, #seconds {
-  font-size: 220px;
-}
-
-#elapsed_timer {
+p#elapsed_timer {
+  margin: 0 auto;
   font-size: 16px;
 }
-
-#controller {
-  margin: 10px 0;
+span#minutes,
+span#seconds {
+  font-size: 220px;
 }
-
+section#controller {
+  font-size: 20px;
+  margin-top: 1em;
+}
 button {
+  display: inline-block;
   padding: 0.5em 1em;
+  width: 120px;
   font-size: 18px;
+  text-decoration: none;
   color: #263238;
   background: #fafafa;
-  border: none;
+  border-bottom: solid 4px #e0e0e0;
   border-radius: 3px;
-  margin: 0.2em;
-  cursor: pointer;
+  margin: 0.5em;
 }
-
+button:active {
+  transform: translateY(4px);
+  border-bottom: none;
+}
+button:disabled {
+  color: #bdbdbd;
+  background: #e0e0e0;
+  border-bottom: solid 4px #9e9e9e;
+}
 #wrap {
   transform: scale(2.5);
-  transform-origin: center;
 }
-
-.top-left {
+#reset.top-left {
   position: absolute;
   top: 10px;
   left: 10px;
 }
-
-#wrapWrapper {
+section#wrapWrapper {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 0;
+  right: 0;
+  height: 75vh;
   width: 200px;
-  height: auto;
-  text-align: left;
+  padding-right: 24px;
 }
-
 ol#wrapList {
-  overflow-y: auto;
-  max-height: 70vh;
-  padding: 0 1em;
+  height: 100%;
+  overflow: hidden;
+  overflow-y: scroll;
 }
-
 li.wrap_item {
-  font-size: 14px;
-  list-style: decimal;
+  margin: 0;
+  padding-left: 5px;
+  margin-top: 4px;
 }
-#startButton {
-  transform: scale(1.2);
+footer {
+  height: 70px;
 }
-
-#wrap {
-  transform: scale(2.5);
-  margin-top: 0.8em;
+p.copyright {
+  margin: 0px;
+  padding: 10px;
 }
