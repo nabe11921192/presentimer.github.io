@@ -149,3 +149,8 @@ p.copyright {
   margin: 0px;
   padding: 10px;
 }
+
+#startButton {
+  transform: scale(3);
+  transform-origin: center;
+}
