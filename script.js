@@ -12,6 +12,7 @@ const wrapListDom = document.getElementById("wrapList");
 let timer;
 let startTime = 0;
 let passTime = 0;
+let passBackup = 0;
 let wrapBackup = 0;
 let wrapList = [];
 
@@ -19,6 +20,7 @@ const zeroPadding = (num) => ("00" + num).slice(-2);
 
 const setupTimer = () => {
   passTime = 0;
+  passBackup = 0;
   wrapBackup = 0;
   timerPar.style.color = "white";
   minutesLbl.innerText = zeroPadding(0);
@@ -29,30 +31,35 @@ const setupTimer = () => {
 
 const getPassTime = () => {
   const currentTime = new Date().getTime();
-  return Math.floor((currentTime - startTime) / 1000);
+  return passBackup + Math.floor((currentTime - startTime) / 1000);
 };
 
-const countUp = () => {
-  passTime = getPassTime();
-  const minutes = Math.floor(passTime / 60);
-  const seconds = passTime % 60;
-  minutesLbl.innerText = zeroPadding(minutes);
-  secondsLbl.innerText = zeroPadding(seconds);
-  elapsedMinutesLbl.innerText = zeroPadding(minutes);
-  elapsedSecondsLbl.innerText = zeroPadding(seconds);
+const updateDisplay = () => {
+  const elapsed = getPassTime();
+  minutesLbl.innerText = zeroPadding(Math.floor(elapsed / 60));
+  secondsLbl.innerText = zeroPadding(elapsed % 60);
+  elapsedMinutesLbl.innerText = zeroPadding(Math.floor(elapsed / 60));
+  elapsedSecondsLbl.innerText = zeroPadding(elapsed % 60);
 };
 
 const startTimer = () => {
+  statusLbl.innerText = "経過";
   startBtn.disabled = true;
+  resetBtn.disabled = false;
   wrapBtn.disabled = false;
-  startTime = new Date().getTime() - passTime * 1000;
-  timer = setInterval(countUp, 100);
+  startTime = new Date().getTime();
+  timer = setInterval(() => {
+    passTime = getPassTime();
+    updateDisplay();
+  }, 100);
 };
 
 const resetTimer = () => {
   clearInterval(timer);
   setupTimer();
+  statusLbl.innerText = "経過";
   startBtn.disabled = false;
+  resetBtn.disabled = false;
   wrapBtn.disabled = true;
   wrapList = [];
   while (wrapListDom.firstChild) {
@@ -61,6 +68,8 @@ const resetTimer = () => {
 };
 
 const addWrap = () => {
+  if (startBtn.disabled === false) return;
+
   const wrapTime = passTime - wrapBackup;
   wrapBackup = passTime;
   const wrapMinute = zeroPadding(Math.floor(wrapTime / 60));
