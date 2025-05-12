@@ -1,52 +1,108 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>プレゼンタイマー</title>
-    <link href="./style.css" rel="stylesheet" type="text/css" />
-    <script type="text/javascript" src="./script.js" defer></script>
-  </head>
-  <body>
-    <section id="main">
-      <div class="inner">
-        <p id="status">残り</p>
-        <p id="timer"><span id="minutes">00</span>分 <span id="seconds">00</span>秒</p>
-        <p id="elapsed_timer">
-          経過時間 <span id="elapsed_minutes">00</span>分 <span id="elapsed_seconds">00</span>秒
-        </p>
-      </div>
-    </section>
+const timerPar = document.getElementById("timer");
+const statusLbl = document.getElementById("status");
+const minutesLbl = document.getElementById("minutes");
+const secondsLbl = document.getElementById("seconds");
+const elapsedMinutesLbl = document.getElementById("elapsed_minutes");
+const elapsedSecondsLbl = document.getElementById("elapsed_seconds");
+const startBtn = document.getElementById("startButton");
+const resetBtn = document.getElementById("reset");
+const wrapBtn = document.getElementById("wrap");
+const limitField = document.getElementById("limitField");
+const wrapListDom = document.getElementById("wrapList");
 
-    <section id="controller">
-      <button id="startButton">開始</button>
-      &emsp;
-      <button id="reset">リセット</button>
-      &emsp;
-      <button id="wrap">ラップ</button>
-      <table>
-        <tr>
-          <td>発表時間</td>
-          <td class="limit">
-            <input type="tel" maxlength="3" placeholder="0" id="limitField" />分
-          </td>
-        </tr>
-      </table>
-    </section>
+let timer;
+let startTime = 0;
+let limitTime = 0;
+let passTime = 0;
+let passBackup = 0;
+let wrapBackup = 0;
+let wrapList = [];
 
-    <section id="wrapWrapper">
-      <h1>ラップタイム</h1>
-      <ol id="wrapList"></ol>
-    </section>
+const zeroPadding = (num) => ("00" + num).slice(-2);
 
-    <section id="githubLinkWrapper">
-      <a href="https://github.com/presentimer/presentimer.github.io" target="_blank">
-        <img src="images/github-mark-white.svg" id="githubMarkSVG" />
-      </a>
-    </section>
+const setupTimer = () => {
+  passTime = 0;
+  passBackup = 0;
+  wrapBackup = 0;
+  timerPar.style.color = "white";
+  minutesLbl.innerText = zeroPadding(limitTime);
+  secondsLbl.innerText = zeroPadding(0);
+  elapsedMinutesLbl.innerText = zeroPadding(0);
+  elapsedSecondsLbl.innerText = zeroPadding(0);
+};
 
-    <footer>
-      <p class="copyright">© 2019-2024 kyome22, tkkrr</p>
-    </footer>
-  </body>
-</html>
+const getPassTime = () => {
+  const currentTime = new Date().getTime();
+  return passBackup + Math.floor((currentTime - startTime) / 1000);
+};
+
+const countDown = () => {
+  passTime = getPassTime();
+  const restTime = limitTime * 60 - passTime;
+  timerPar.style.color = restTime < 0 ? "#E64A19" : "white";
+  minutesLbl.innerText = zeroPadding(Math.abs(parseInt(restTime / 60, 10)));
+  secondsLbl.innerText = zeroPadding(Math.abs(restTime) % 60);
+  elapsedMinutesLbl.innerText = zeroPadding(Math.abs(parseInt(passTime / 60, 10)));
+  elapsedSecondsLbl.innerText = zeroPadding(Math.abs(passTime) % 60);
+};
+
+const startTimer = () => {
+  statusLbl.innerText = "残り";
+  startBtn.disabled = true;
+  resetBtn.disabled = false;
+  wrapBtn.disabled = false;
+  limitField.disabled = true;
+  startTime = new Date().getTime();
+  timer = setInterval(countDown, 100);
+};
+
+const stopTimer = () => {
+  clearInterval(timer);
+  passBackup = passTime;
+  statusLbl.innerText = "停止中";
+  startBtn.disabled = false;
+  resetBtn.disabled = false;
+  wrapBtn.disabled = true;
+  limitField.disabled = false;
+};
+
+const resetTimer = () => {
+  setupTimer();
+  statusLbl.innerText = "残り";
+  resetBtn.disabled = true;
+  wrapBtn.disabled = true;
+  wrapList = [];
+  while (wrapListDom.firstChild) {
+    wrapListDom.removeChild(wrapListDom.firstChild);
+  }
+};
+
+const addWrap = () => {
+  if (startBtn.disabled === false) return;
+  const wrapTime = passTime - wrapBackup;
+  wrapBackup = passTime;
+  const wrapMinute = zeroPadding(parseInt(wrapTime / 60, 10));
+  const wrapSecond = zeroPadding(wrapTime % 60);
+  const wrapIndex = wrapList.length + 1;
+  const text = `${wrapIndex}回目 ${wrapMinute}分${wrapSecond}秒`;
+  const li = document.createElement("li");
+  li.className = "wrap_item";
+  li.textContent = text;
+  wrapListDom.appendChild(li);
+  wrapList.push(text);
+};
+
+const updateLimit = () => {
+  const value = parseInt(limitField.value);
+  limitTime = isNaN(value) ? 0 : value;
+  limitField.value = limitTime;
+  setupTimer();
+};
+
+window.addEventListener("load", () => {
+  startBtn.addEventListener("click", startTimer);
+  resetBtn.addEventListener("click", resetTimer);
+  wrapBtn.addEventListener("click", addWrap);
+  limitField.addEventListener("input", updateLimit);
+  updateLimit();
+});
