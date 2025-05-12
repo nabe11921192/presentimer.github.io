@@ -24,26 +24,23 @@ const setupTimer = () => {
   passTime = 0;
   passBackup = 0;
   wrapBackup = 0;
-  timerPar.style.color = "white";
   minutesLbl.innerText = zeroPadding(limitTime);
-  secondsLbl.innerText = zeroPadding(0);
-  elapsedMinutesLbl.innerText = zeroPadding(0);
-  elapsedSecondsLbl.innerText = zeroPadding(0);
+  secondsLbl.innerText = "00";
+  elapsedMinutesLbl.innerText = "00";
+  elapsedSecondsLbl.innerText = "00";
 };
 
 const getPassTime = () => {
-  const currentTime = new Date().getTime();
-  return passBackup + Math.floor((currentTime - startTime) / 1000);
+  return passBackup + Math.floor((Date.now() - startTime) / 1000);
 };
 
 const countDown = () => {
   passTime = getPassTime();
   const restTime = limitTime * 60 - passTime;
-  timerPar.style.color = restTime < 0 ? "#E64A19" : "white";
-  minutesLbl.innerText = zeroPadding(Math.abs(parseInt(restTime / 60, 10)));
-  secondsLbl.innerText = zeroPadding(Math.abs(restTime) % 60);
-  elapsedMinutesLbl.innerText = zeroPadding(Math.abs(parseInt(passTime / 60, 10)));
-  elapsedSecondsLbl.innerText = zeroPadding(Math.abs(passTime) % 60);
+  minutesLbl.innerText = zeroPadding(Math.abs(parseInt(restTime / 60)));
+  secondsLbl.innerText = zeroPadding(Math.abs(restTime % 60));
+  elapsedMinutesLbl.innerText = zeroPadding(parseInt(passTime / 60));
+  elapsedSecondsLbl.innerText = zeroPadding(passTime % 60);
 };
 
 const startTimer = () => {
@@ -52,7 +49,7 @@ const startTimer = () => {
   resetBtn.disabled = false;
   wrapBtn.disabled = false;
   limitField.disabled = true;
-  startTime = new Date().getTime();
+  startTime = Date.now();
   timer = setInterval(countDown, 100);
 };
 
@@ -67,29 +64,34 @@ const stopTimer = () => {
 };
 
 const resetTimer = () => {
+  clearInterval(timer);
+  timer = null;
   setupTimer();
   statusLbl.innerText = "残り";
   resetBtn.disabled = true;
   wrapBtn.disabled = true;
   wrapList = [];
-  while (wrapListDom.firstChild) {
-    wrapListDom.removeChild(wrapListDom.firstChild);
-  }
+  while (wrapListDom.firstChild) wrapListDom.removeChild(wrapListDom.firstChild);
 };
 
 const addWrap = () => {
   if (startBtn.disabled === false) return;
   const wrapTime = passTime - wrapBackup;
   wrapBackup = passTime;
-  const wrapMinute = zeroPadding(parseInt(wrapTime / 60, 10));
+
+  const wrapMinute = zeroPadding(parseInt(wrapTime / 60));
   const wrapSecond = zeroPadding(wrapTime % 60);
   const wrapIndex = wrapList.length + 1;
   const text = `${wrapIndex}回目 ${wrapMinute}分${wrapSecond}秒`;
+
   const li = document.createElement("li");
   li.className = "wrap_item";
   li.textContent = text;
   wrapListDom.appendChild(li);
   wrapList.push(text);
+
+  minutesLbl.innerText = "00";
+  secondsLbl.innerText = "00";
 };
 
 const updateLimit = () => {
