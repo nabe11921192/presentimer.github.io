@@ -1,8 +1,9 @@
+const timerPar = document.getElementById("timer");
+const statusLbl = document.getElementById("status");
 const minutesLbl = document.getElementById("minutes");
 const secondsLbl = document.getElementById("seconds");
 const elapsedMinutesLbl = document.getElementById("elapsed_minutes");
 const elapsedSecondsLbl = document.getElementById("elapsed_seconds");
-
 const startBtn = document.getElementById("startButton");
 const resetBtn = document.getElementById("reset");
 const wrapBtn = document.getElementById("wrap");
@@ -11,18 +12,30 @@ const wrapListDom = document.getElementById("wrapList");
 let timer;
 let startTime = 0;
 let passTime = 0;
-let wrapTime = 0;
-let isRunning = false;
+let wrapBackup = 0;
+let wrapList = [];
 
 const zeroPadding = (num) => ("00" + num).slice(-2);
 
-const updateTimer = () => {
-  const current = new Date().getTime();
-  passTime = Math.floor((current - startTime) / 1000);
+const setupTimer = () => {
+  passTime = 0;
+  wrapBackup = 0;
+  timerPar.style.color = "white";
+  minutesLbl.innerText = zeroPadding(0);
+  secondsLbl.innerText = zeroPadding(0);
+  elapsedMinutesLbl.innerText = zeroPadding(0);
+  elapsedSecondsLbl.innerText = zeroPadding(0);
+};
 
+const getPassTime = () => {
+  const currentTime = new Date().getTime();
+  return Math.floor((currentTime - startTime) / 1000);
+};
+
+const countUp = () => {
+  passTime = getPassTime();
   const minutes = Math.floor(passTime / 60);
   const seconds = passTime % 60;
-
   minutesLbl.innerText = zeroPadding(minutes);
   secondsLbl.innerText = zeroPadding(seconds);
   elapsedMinutesLbl.innerText = zeroPadding(minutes);
@@ -30,42 +43,40 @@ const updateTimer = () => {
 };
 
 const startTimer = () => {
-  if (isRunning) return;
+  startBtn.disabled = true;
+  wrapBtn.disabled = false;
   startTime = new Date().getTime() - passTime * 1000;
-  timer = setInterval(updateTimer, 100);
-  isRunning = true;
+  timer = setInterval(countUp, 100);
 };
 
 const resetTimer = () => {
   clearInterval(timer);
-  passTime = 0;
-  wrapTime = 0;
-  isRunning = false;
-  minutesLbl.innerText = "00";
-  secondsLbl.innerText = "00";
-  elapsedMinutesLbl.innerText = "00";
-  elapsedSecondsLbl.innerText = "00";
-  wrapListDom.innerHTML = "";
+  setupTimer();
+  startBtn.disabled = false;
+  wrapBtn.disabled = true;
+  wrapList = [];
+  while (wrapListDom.firstChild) {
+    wrapListDom.removeChild(wrapListDom.firstChild);
+  }
 };
 
 const addWrap = () => {
-  if (!isRunning) return;
-  const now = passTime;
-  const diff = now - wrapTime;
-  wrapTime = now;
-
-  const wrapMin = zeroPadding(Math.floor(diff / 60));
-  const wrapSec = zeroPadding(diff % 60);
-  const count = wrapListDom.children.length + 1;
-
+  const wrapTime = passTime - wrapBackup;
+  wrapBackup = passTime;
+  const wrapMinute = zeroPadding(Math.floor(wrapTime / 60));
+  const wrapSecond = zeroPadding(wrapTime % 60);
+  const wrapIndex = wrapList.length + 1;
+  const text = `${wrapIndex}回目 ${wrapMinute}分${wrapSecond}秒`;
   const li = document.createElement("li");
   li.className = "wrap_item";
-  li.textContent = `${count}回目 ${wrapMin}分${wrapSec}秒`;
+  li.textContent = text;
   wrapListDom.appendChild(li);
+  wrapList.push(text);
 };
 
 window.addEventListener("load", () => {
   startBtn.addEventListener("click", startTimer);
   resetBtn.addEventListener("click", resetTimer);
   wrapBtn.addEventListener("click", addWrap);
+  setupTimer();
 });
