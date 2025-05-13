@@ -12,7 +12,7 @@ const wrapBtn = document.getElementById("wrap");
 const wrapListDom = document.getElementById("wrapList");
 
 // ✅ タイマー変数
-let timer;
+let timer = null;
 let startTime = 0;
 let passTime = 0;
 let passBackup = 0;
@@ -49,7 +49,7 @@ const isBlockedTime = () => {
   });
 };
 
-// ✅ 現在時刻を更新 & ボタン状態制御（← 開始は常に有効に）
+// ✅ 現在時刻を更新 & 開始ボタンを有効に
 const updateNowTime = () => {
   const now = new Date();
   const h = zeroPad(now.getHours(), 2);
@@ -57,7 +57,7 @@ const updateNowTime = () => {
   const s = zeroPad(now.getSeconds(), 2);
   nowTimeLbl.innerText = `${h}時${m}分${s}秒`;
 
-  // ✅ timerが動いていないときは開始ボタンを常に有効に
+  // 停止中なら常にボタンを有効化
   if (!timer) {
     startBtn.disabled = false;
   }
@@ -83,7 +83,7 @@ const getPassTime = () => {
   return passBackup + Math.floor((currentTime - startTime) / 1000);
 };
 
-// ✅ カウントアップ
+// ✅ カウントアップ処理
 const countUp = () => {
   passTime = getPassTime();
   const totalSeconds = passTime;
@@ -93,9 +93,12 @@ const countUp = () => {
   elapsedSecondsLbl.innerText = zeroPad(totalSeconds % 60, 2);
 };
 
-// ✅ タイマー開始（← ブロック中でも開始可能に）
+// ✅ タイマー開始（ボタンが効かない問題を修正）
 const startTimer = () => {
-  if (timer) return;
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+  }
 
   startBtn.disabled = true;
   resetBtn.disabled = false;
@@ -128,7 +131,7 @@ const resetTimer = () => {
   }
 };
 
-// ✅ ラップ処理（停止中なら再開も）
+// ✅ ラップ処理（停止中でも再開）
 const addWrap = () => {
   if (!timer && !isBlockedTime()) {
     startTime = new Date().getTime();
