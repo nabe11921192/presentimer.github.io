@@ -1,18 +1,15 @@
-html {
+html, body {
   height: 100%;
-}
-
-body {
-  text-align: center;
   margin: 0;
   padding: 0;
-  height: 100%;
   background-color: #263238;
   color: white;
+  text-align: center;
+  overflow: hidden;
 }
 
 section#main {
-  height: calc(100% - 280px);
+  height: calc(100% - 250px);
   width: 100%;
   display: table;
 }
@@ -22,7 +19,6 @@ div.inner {
   vertical-align: middle;
 }
 
-/* 経過時間は非表示 */
 p#status,
 p#elapsed_timer {
   display: none;
@@ -35,21 +31,37 @@ p#timer {
 
 span#minutes,
 span#seconds {
-  font-size: 660px; /* 3倍 */
+  font-size: 480px; /* 縮小して収まるように */
 }
 
-/* ボタン配置：横並び、中央 */
+#now_time {
+  font-size: 72px; /* 小さめに調整 */
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  color: #ffffff;
+}
+
+#reset {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  font-size: 36px;
+  padding: 1em 2em;
+}
+
 section#controller {
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 80px;
-  margin-top: 40px;
+  gap: 60px;
+  margin-top: 20px;
   position: relative;
 }
 
-/* 汎用ボタンデザイン */
 button {
   display: inline-block;
   font-size: 54px;
@@ -59,7 +71,6 @@ button {
   background: #fafafa;
   border-bottom: solid 4px #e0e0e0;
   border-radius: 6px;
-  margin: 0.5em;
 }
 
 button:active {
@@ -73,63 +84,37 @@ button:disabled {
   border-bottom: solid 4px #9e9e9e;
 }
 
-/* 開始ボタンそのまま */
 #startButton {
   font-size: 54px;
   padding: 1.5em 3em;
 }
 
-/* ラップボタンを1.7倍 */
 #wrap {
-  font-size: 91.8px; /* 54px × 1.7 */
+  font-size: 91.8px; /* ラップボタンは1.7倍のまま */
   padding: 2.55em 5.1em;
 }
 
-/* リセットボタン：左上固定・サイズ統一 */
-#reset {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  font-size: 54px;
-  padding: 1.5em 3em;
-}
-
-/* 時計：上中央配置、フォントサイズ108px */
-#now_time {
-  font-size: 108px;
-  position: fixed;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  color: #ffffff;
-}
-
-/* ラップタイムエリア */
 section#wrapWrapper {
   position: absolute;
-  top: 140px;
+  top: 120px;
   right: 0;
-  height: 75vh;
-  width: 100%;
-  max-width: 480px;
-  padding-right: 24px;
+  width: 320px;
+  height: calc(100% - 120px);
+  padding-right: 12px;
   overflow-y: auto;
   text-align: left;
-  font-size: 90px; /* 「ラップタイム」タイトルも2倍に */
+  font-size: 60px; /* ラップタイトル */
 }
 
-/* ラップタイムリスト */
 ol#wrapList {
   list-style: none;
   padding-left: 0;
 }
 
-/* ラップ内容 */
 ol#wrapList li.wrap_item {
-  margin: 0 0 40px 0;
+  font-size: 60px;
+  margin-bottom: 20px;
   white-space: nowrap;
-  font-size: 90px; /* 2倍表示 */
 }
 
 ol#wrapList::-webkit-scrollbar {
@@ -146,24 +131,6 @@ ol#wrapList::-webkit-scrollbar-track {
   border-radius: 10px;
 }
 
-section#githubLinkWrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 30px;
-  width: 30px;
-  padding: 24px;
-}
-
-img#githubMarkSVG {
-  width: 30px;
-}
-
 footer {
-  height: 70px;
-}
-
-p.copyright {
-  margin: 0px;
-  padding: 10px;
+  display: none;
 }
