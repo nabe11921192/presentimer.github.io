@@ -168,3 +168,10 @@ window.addEventListener("load", () => {
   resetBtn.addEventListener("click", resetTimer);
   wrapBtn.addEventListener("click", addWrap);
 });
+
+console.log("✅ script.js 読み込まれました");
+
+startBtn.addEventListener("click", () => {
+  console.log("▶️ 開始ボタン押されました");
+  startTimer();
+});
