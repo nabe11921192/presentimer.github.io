@@ -1,6 +1,5 @@
 // 要素の取得
 const timerPar = document.getElementById("timer");
-const statusLbl = document.getElementById("status");
 const minutesLbl = document.getElementById("minutes");
 const secondsLbl = document.getElementById("seconds");
 const elapsedMinutesLbl = document.getElementById("elapsed_minutes");
@@ -13,7 +12,7 @@ const wrapBtn = document.getElementById("wrap");
 const wrapListDom = document.getElementById("wrapList");
 
 // タイマー用変数
-let timer;
+let timer = null;
 let startTime = 0;
 let passTime = 0;
 let passBackup = 0;
@@ -37,22 +36,27 @@ const blockedTimeRanges = [
   ["07:20", "07:30"],
 ];
 
-// ✅ 現在がブロック時間か判定
+// ✅ 現在がブロック時間か判定（00:00 跨ぎ対応）
 const isBlockedTime = () => {
   const now = new Date();
-  const h = zeroPad(now.getHours(), 2);
-  const m = zeroPad(now.getMinutes(), 2);
-  const current = `${h}:${m}`;
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-  return blockedTimeRanges.some(([start, end]) => {
-    if (end === "00:00") {
-      return current >= start || current < "00:00";
+  return blockedTimeRanges.some(([startStr, endStr]) => {
+    const [sh, sm] = startStr.split(":").map(Number);
+    const [eh, em] = endStr === "00:00" ? [24, 0] : endStr.split(":").map(Number);
+
+    const start = sh * 60 + sm;
+    const end = eh * 60 + em;
+
+    if (start < end) {
+      return currentMinutes >= start && currentMinutes < end;
+    } else {
+      return currentMinutes >= start || currentMinutes < end;
     }
-    return current >= start && current < end;
   });
 };
 
-// ✅ 現在時刻の表示 & ボタン有効化制御
+// ✅ 現在時刻の表示 & ブロック状態によるボタン制御
 const updateNowTime = () => {
   const now = new Date();
   const h = zeroPad(now.getHours(), 2);
@@ -60,19 +64,17 @@ const updateNowTime = () => {
   const s = zeroPad(now.getSeconds(), 2);
   nowTimeLbl.innerText = `${h}時${m}分${s}秒`;
 
-  // ⛔ ブロック時間中はstartボタン無効化
   if (isBlockedTime()) {
     startBtn.disabled = true;
     wrapBtn.disabled = true;
   } else if (!timer) {
-    // タイマー動作中でなければ有効化
     startBtn.disabled = false;
   }
 };
 setInterval(updateNowTime, 1000);
 updateNowTime();
 
-// ✅ タイマー初期化
+// ✅ 初期化
 const setupTimer = () => {
   passTime = 0;
   passBackup = 0;
@@ -84,24 +86,23 @@ const setupTimer = () => {
   elapsedSecondsLbl.innerText = zeroPad(0, 2);
 };
 
-// ✅ 経過秒数を取得
+// ✅ 経過秒数
 const getPassTime = () => {
   const currentTime = new Date().getTime();
   return passBackup + Math.floor((currentTime - startTime) / 1000);
 };
 
-// ✅ カウントアップ処理
+// ✅ カウントアップ
 const countUp = () => {
   passTime = getPassTime();
   const totalSeconds = passTime;
-  timerPar.style.color = "white";
   minutesLbl.innerText = zeroPad(Math.floor(totalSeconds / 60), 3);
   secondsLbl.innerText = zeroPad(totalSeconds % 60, 2);
   elapsedMinutesLbl.innerText = zeroPad(Math.floor(totalSeconds / 60), 2);
   elapsedSecondsLbl.innerText = zeroPad(totalSeconds % 60, 2);
 };
 
-// ✅ スタート処理（ブロック中なら不可）
+// ✅ スタート処理
 const startTimer = () => {
   if (isBlockedTime()) {
     alert("現在の時間帯ではタイマーを開始できません。");
@@ -131,7 +132,7 @@ const resetTimer = () => {
   clearInterval(timer);
   timer = null;
   setupTimer();
-  startBtn.disabled = isBlockedTime(); // ← 今がブロック中ならボタン無効
+  startBtn.disabled = isBlockedTime();
   resetBtn.disabled = false;
   wrapBtn.disabled = true;
   wrapList = [];
@@ -140,7 +141,7 @@ const resetTimer = () => {
   }
 };
 
-// ✅ ラップ処理
+// ✅ ラップ
 const addWrap = () => {
   if (startBtn.disabled === false) return;
   const wrapTime = passTime - wrapBackup;
@@ -156,7 +157,7 @@ const addWrap = () => {
   wrapList.push(text);
 };
 
-// ✅ イベントバインド
+// ✅ イベント登録
 window.addEventListener("load", () => {
   setupTimer();
   startBtn.addEventListener("click", startTimer);
