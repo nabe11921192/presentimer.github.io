@@ -32,22 +32,23 @@ const blockedTimeRanges = [
   ["07:20", "07:30"],
 ];
 
+// ✅ ブロック時間判定 + ログ
 const isBlockedTime = () => {
   const now = new Date();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-  return blockedTimeRanges.some(([startStr, endStr]) => {
+  const result = blockedTimeRanges.some(([startStr, endStr]) => {
     const [sh, sm] = startStr.split(":").map(Number);
     const [eh, em] = endStr === "00:00" ? [24, 0] : endStr.split(":").map(Number);
     const start = sh * 60 + sm;
     const end = eh * 60 + em;
-
     if (start < end) {
       return currentMinutes >= start && currentMinutes < end;
     } else {
       return currentMinutes >= start || currentMinutes < end;
     }
   });
+  console.log(`現在の時刻: ${now.getHours()}時${now.getMinutes()}分 → ブロック中？`, result);
+  return result;
 };
 
 const updateNowTime = () => {
@@ -92,6 +93,8 @@ const countUp = () => {
 };
 
 const startTimer = () => {
+  console.log("🔵 開始ボタンが押された。ブロック中？", isBlockedTime());
+
   if (isBlockedTime()) {
     alert("現在の時間帯ではタイマーを開始できません。");
     return;
@@ -106,7 +109,7 @@ const startTimer = () => {
     if (isBlockedTime()) {
       clearInterval(timer);
       timer = null;
-      alert("ブロック時間に入ったため、タイマーを停止しました。");
+      alert("⚠️ ブロック時間に入ったため、タイマーを停止しました。");
       wrapBtn.disabled = true;
       startBtn.disabled = true;
       return;
@@ -149,3 +152,4 @@ window.addEventListener("load", () => {
   resetBtn.addEventListener("click", resetTimer);
   wrapBtn.addEventListener("click", addWrap);
 });
+
