@@ -135,7 +135,7 @@ const resetTimer = () => {
   }
 };
 
-// ✅ ラップ処理
+// ✅ ラップ処理（押したらカウントリセット）
 const addWrap = () => {
   if (startBtn.disabled === false) return;
   const wrapTime = passTime - wrapBackup;
@@ -149,6 +149,9 @@ const addWrap = () => {
   li.textContent = text;
   wrapListDom.appendChild(li);
   wrapList.push(text);
+
+  // ⏱️ ラップ後にカウントをリセット
+  passBackup = passTime;
 };
 
 // ✅ イベント登録
