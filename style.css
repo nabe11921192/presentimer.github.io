@@ -22,7 +22,7 @@ div.inner {
   vertical-align: middle;
 }
 
-/* 経過の表示削除 */
+/* 非表示にするラベル類 */
 p#status,
 p#elapsed_timer {
   display: none;
@@ -40,7 +40,7 @@ span#seconds {
 
 section#controller {
   display: flex;
-  flex-direction: row;  /* 横並びに変更 */
+  flex-direction: row;  /* 横並び */
   justify-content: center;
   align-items: center;
   gap: 80px;
@@ -50,14 +50,14 @@ section#controller {
 
 button {
   display: inline-block;
-  padding: 0.5em 1em;
-  font-size: 18px;
+  padding: 1.5em 3em; /* 3倍 */
+  font-size: 54px;    /* 3倍 */
   text-decoration: none;
   color: #263238;
   background: #fafafa;
   border-bottom: solid 4px #e0e0e0;
-  border-radius: 3px;
-  margin: 0.2em;
+  border-radius: 6px;
+  margin: 0.5em;
 }
 
 button:active {
@@ -72,24 +72,26 @@ button:disabled {
 }
 
 #startButton {
-  font-size: 24px;
-  padding: 10px 40px;
+  font-size: 54px;
+  padding: 1.5em 3em;
 }
 
 #wrap {
-  font-size: 30px;
-  padding: 15px 60px;
+  font-size: 54px;
+  padding: 1.5em 3em;
 }
 
 #reset {
   position: fixed;
   top: 20px;
   left: 20px;
+  font-size: 54px;
+  padding: 1.5em 3em;
 }
 
 #now_time {
-  font-size: 54px; /* 3倍 */
-  margin-top: 10px;
+  font-size: 108px; /* 2倍 */
+  margin-top: 20px;
   color: #ffffff;
 }
 
@@ -98,15 +100,22 @@ section#wrapWrapper {
   top: 0;
   right: 0;
   height: 75vh;
-  width: 181px;
+  width: 100%;
+  max-width: 400px;
   padding-right: 24px;
+  overflow-y: auto;
+  text-align: left;
 }
 
 ol#wrapList {
-  height: 100%;
-  overflow-y: scroll;
-  list-style: none; /* 番号を非表示 */
+  list-style: none;
   padding-left: 0;
+  font-size: 45px;
+}
+
+ol#wrapList li.wrap_item {
+  margin: 0 0 20px 0;
+  white-space: nowrap;
 }
 
 ol#wrapList::-webkit-scrollbar {
@@ -121,13 +130,6 @@ ol#wrapList::-webkit-scrollbar-thumb {
 ol#wrapList::-webkit-scrollbar-track {
   background-color: rgba(0.8, 0.8, 0.8, 0.1);
   border-radius: 10px;
-}
-
-li.wrap_item {
-  font-size: 45px; /* ラップタイム 3倍 */
-  margin: 0;
-  padding-left: 5px;
-  margin-top: 4px;
 }
 
 section#githubLinkWrapper {
