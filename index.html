@@ -118,9 +118,6 @@
       <span id="minutes">000</span><span class="unit">分</span>
       <span id="seconds">00</span><span class="unit">秒</span>
     </p>
-    <p id="elapsed_timer" style="display:none;">
-      経過時間 <span id="elapsed_minutes">00</span>分 <span id="elapsed_seconds">00</span>秒
-    </p>
   </section>
 
   <section id="controller">
@@ -138,10 +135,7 @@
     const timerPar = document.getElementById("timer");
     const minutesLbl = document.getElementById("minutes");
     const secondsLbl = document.getElementById("seconds");
-    const elapsedMinutesLbl = document.getElementById("elapsed_minutes");
-    const elapsedSecondsLbl = document.getElementById("elapsed_seconds");
     const nowTimeLbl = document.getElementById("now_time");
-
     const startBtn = document.getElementById("startButton");
     const resetBtn = document.getElementById("reset");
     const wrapBtn = document.getElementById("wrap");
@@ -150,7 +144,6 @@
     let timer = null;
     let startTime = 0;
     let passTime = 0;
-    let wrapBackup = 0;
     let wrapList = [];
 
     const zeroPad = (num, digits) => String(num).padStart(digits, "0");
@@ -193,12 +186,9 @@
 
     const setupTimer = () => {
       passTime = 0;
-      wrapBackup = 0;
       timerPar.style.color = "white";
       minutesLbl.innerText = zeroPad(0, 3);
       secondsLbl.innerText = zeroPad(0, 2);
-      elapsedMinutesLbl.innerText = zeroPad(0, 2);
-      elapsedSecondsLbl.innerText = zeroPad(0, 2);
     };
 
     const getPassTime = () => {
@@ -210,8 +200,6 @@
       passTime = getPassTime();
       minutesLbl.innerText = zeroPad(Math.floor(passTime / 60), 3);
       secondsLbl.innerText = zeroPad(passTime % 60, 2);
-      elapsedMinutesLbl.innerText = zeroPad(Math.floor(passTime / 60), 2);
-      elapsedSecondsLbl.innerText = zeroPad(passTime % 60, 2);
     };
 
     const startTimer = () => {
@@ -253,8 +241,8 @@
     const addWrap = () => {
       if (!timer) return;
 
-      const wrapTime = passTime - wrapBackup;
-      wrapBackup = passTime;
+      const now = new Date().getTime();
+      const wrapTime = Math.floor((now - startTime) / 1000);
 
       const wrapMinute = zeroPad(Math.floor(wrapTime / 60), 2);
       const wrapSecond = zeroPad(wrapTime % 60, 2);
@@ -266,6 +254,10 @@
       li.textContent = text;
       wrapListDom.appendChild(li);
       wrapList.push(text);
+
+      // ⏱ ラップ押した瞬間にリセット
+      startTime = now;
+      passTime = 0;
     };
 
     window.addEventListener("load", () => {
