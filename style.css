@@ -4,56 +4,56 @@ html, body {
   padding: 0;
   background-color: #263238;
   color: white;
-  text-align: center;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-/* ✅ リアルタイム時計（1.2倍に拡大） */
+/* 上のリアルタイム時計 */
 #now_time {
-  font-size: 6vh; /* ← 以前は5vh */
-  position: fixed;
-  top: 1vh;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
+  font-size: 6vh;
+  margin-top: 1vh;
+  text-align: center;
 }
 
-/* リセットボタン：左上 */
+/* リセットボタン */
 #reset {
   position: fixed;
   top: 2vh;
   left: 2vw;
   font-size: 3vh;
   padding: 1vh 2vw;
+  z-index: 10;
 }
 
-/* ✅ タイマーの分・秒を最大表示 */
+/* メインタイマー表示エリア */
 section#main {
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 60vh;
-  margin-top: 10vh;
+  margin-top: 2vh;
 }
 
 span#minutes,
 span#seconds {
-  font-size: 38vh; /* 最大表示 */
+  font-size: 30vh;  /* ← 少し小さくして収める */
 }
 
-/* 経過時間のラベル削除 */
+/* 経過は非表示 */
 p#status,
 p#elapsed_timer {
   display: none !important;
 }
 
-/* ボタン配置：距離あり */
+/* ボタンエリア */
 section#controller {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10vw;
-  margin-top: 3vh;
+  gap: 6vw;
+  margin-bottom: 4vh;
 }
 
 #startButton {
@@ -66,7 +66,7 @@ section#controller {
   padding: 2.1em 4.2em;
 }
 
-/* ラップタイムを右上寄せ */
+/* ラップタイム */
 section#wrapWrapper {
   position: fixed;
   top: 10vh;
@@ -90,6 +90,7 @@ ol#wrapList li.wrap_item {
   font-size: 3.5vh;
 }
 
+/* スクロールバー */
 ol#wrapList::-webkit-scrollbar {
   width: 5px;
 }
