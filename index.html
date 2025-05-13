@@ -11,17 +11,22 @@
       display: flex; flex-direction: column; justify-content: space-between;
     }
     #now_time {
-      font-size: 11.0vh;
-      position: fixed; top: 1vh; left: 50%; transform: translateX(-50%);
+      font-size: 11vh;
+      position: fixed;
+      top: 1vh;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 10;
-      padding: 1vh 2vw;
-      border: 3px solid white;
+      padding: 0.5vh 2vw;
+      border: 2px solid white;
       border-radius: 10px;
-      background-color: transparent;
     }
     #reset {
-      position: fixed; top: 2vh; left: 2vw;
-      font-size: 2.5vh; padding: 0.7vh 1.5vw;
+      position: fixed;
+      top: 2vh;
+      left: 2vw;
+      font-size: 2.5vh;
+      padding: 0.7vh 1.5vw;
       z-index: 10;
     }
     section#main {
@@ -50,7 +55,7 @@
     }
     #wrap {
       font-size: 3.1vh;
-      padding: 6vh 9vw;
+      padding: 6vh 7.2vw;
       border-radius: 12px;
       background-color: #ffeb3b;
       color: #000;
@@ -117,9 +122,39 @@
 
     const zeroPad = (num, digits) => String(num).padStart(digits, "0");
 
+    const blockedTimeRanges = [
+      ["10:15", "10:25"],
+      ["12:15", "13:00"],
+      ["15:00", "15:10"],
+      ["17:10", "17:20"],
+      ["19:20", "19:30"],
+      ["22:15", "22:25"],
+      ["00:15", "01:00"],
+      ["03:00", "03:10"],
+      ["05:10", "05:20"],
+      ["07:20", "07:30"]
+    ];
+
+    const isBlockedTime = () => {
+      const now = new Date();
+      const current = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
+      return blockedTimeRanges.some(([start, end]) => {
+        if (start > end) {
+          return current >= start || current < end;
+        } else {
+          return current >= start && current < end;
+        }
+      });
+    };
+
     const updateNowTime = () => {
       const now = new Date();
       nowTimeLbl.innerText = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}:${zeroPad(now.getSeconds(),2)}`;
+      if (!timer && isBlockedTime()) {
+        startBtn.disabled = true;
+      } else if (!timer) {
+        startBtn.disabled = false;
+      }
     };
     setInterval(updateNowTime, 1000);
     updateNowTime();
@@ -133,6 +168,12 @@
     const getPassTime = () => Math.floor((new Date().getTime() - startTime) / 1000);
 
     const countUp = () => {
+      if (isBlockedTime()) {
+        clearInterval(timer);
+        timer = null;
+        startBtn.disabled = false;
+        return;
+      }
       passTime = getPassTime();
       minutesLbl.innerText = zeroPad(Math.floor(passTime / 60), 3);
       secondsLbl.innerText = zeroPad(passTime % 60, 2);
@@ -164,8 +205,8 @@
       const startStr = `${zeroPad(lastStartDate.getHours(),2)}:${zeroPad(lastStartDate.getMinutes(),2)}`;
       const endStr = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
       const wrapStr = `${zeroPad(Math.floor(wrapTime / 60),2)}分${zeroPad(wrapTime % 60,2)}秒`;
-
       const text = `${wrapList.length+1}回目 ${startStr}～${endStr}　${wrapStr}`;
+
       const li = document.createElement("li");
       li.className = "wrap_item";
       li.textContent = text;
