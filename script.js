@@ -49,7 +49,7 @@ const isBlockedTime = () => {
   });
 };
 
-// ✅ 現在時刻を更新 & ボタン制御
+// ✅ 現在時刻を更新 & ボタン状態制御（← 開始は常に有効に）
 const updateNowTime = () => {
   const now = new Date();
   const h = zeroPad(now.getHours(), 2);
@@ -57,9 +57,8 @@ const updateNowTime = () => {
   const s = zeroPad(now.getSeconds(), 2);
   nowTimeLbl.innerText = `${h}時${m}分${s}秒`;
 
-  if (isBlockedTime()) {
-    startBtn.disabled = true;
-  } else if (!timer) {
+  // ✅ timerが動いていないときは開始ボタンを常に有効に
+  if (!timer) {
     startBtn.disabled = false;
   }
 };
@@ -94,9 +93,8 @@ const countUp = () => {
   elapsedSecondsLbl.innerText = zeroPad(totalSeconds % 60, 2);
 };
 
-// ✅ タイマー開始
+// ✅ タイマー開始（← ブロック中でも開始可能に）
 const startTimer = () => {
-  if (isBlockedTime()) return;
   if (timer) return;
 
   startBtn.disabled = true;
@@ -121,7 +119,7 @@ const resetTimer = () => {
   clearInterval(timer);
   timer = null;
   setupTimer();
-  startBtn.disabled = isBlockedTime();
+  startBtn.disabled = false;
   resetBtn.disabled = false;
   wrapBtn.disabled = true;
   wrapList = [];
