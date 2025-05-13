@@ -1,3 +1,4 @@
+// ✅ 要素の取得
 const timerPar = document.getElementById("timer");
 const minutesLbl = document.getElementById("minutes");
 const secondsLbl = document.getElementById("seconds");
@@ -10,6 +11,7 @@ const resetBtn = document.getElementById("reset");
 const wrapBtn = document.getElementById("wrap");
 const wrapListDom = document.getElementById("wrapList");
 
+// ✅ タイマー変数
 let timer;
 let startTime = 0;
 let passTime = 0;
@@ -17,40 +19,38 @@ let passBackup = 0;
 let wrapBackup = 0;
 let wrapList = [];
 
+// ✅ ゼロ埋め関数
 const zeroPad = (num, digits) => String(num).padStart(digits, "0");
 
+// ✅ ブロック時間帯（24時間表記）
 const blockedTimeRanges = [
-  // ["10:15", "10:25"], ← コメントアウト
-  // ["12:15", "13:00"],
-  // ["15:00", "15:10"],
-  // ["17:10", "17:20"],
-  // ["19:20", "19:30"],
-  // ["22:15", "22:25"],
-  // ["00:15", "00:00"],
-  // ["03:00", "03:10"],
-  // ["05:10", "05:20"],
-  // ["07:20", "07:30"],
+  ["10:15", "10:25"],
+  ["12:15", "13:00"],
+  ["15:00", "15:10"],
+  ["17:10", "17:20"],
+  ["19:20", "19:30"],
+  ["22:15", "22:25"],
+  ["00:15", "01:00"],
+  ["03:00", "03:10"],
+  ["05:10", "05:20"],
+  ["07:20", "07:30"],
 ];
 
-// ✅ ブロック時間判定 + ログ
+// ✅ 現在がブロック時間か？
 const isBlockedTime = () => {
   const now = new Date();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  const result = blockedTimeRanges.some(([startStr, endStr]) => {
-    const [sh, sm] = startStr.split(":").map(Number);
-    const [eh, em] = endStr === "00:00" ? [24, 0] : endStr.split(":").map(Number);
-    const start = sh * 60 + sm;
-    const end = eh * 60 + em;
-    if (start < end) {
-      return currentMinutes >= start && currentMinutes < end;
+  const current = `${zeroPad(now.getHours(), 2)}:${zeroPad(now.getMinutes(), 2)}`;
+
+  return blockedTimeRanges.some(([start, end]) => {
+    if (start > end) {
+      return current >= start || current < end;
     } else {
-      return currentMinutes >= start || currentMinutes < end;
+      return current >= start && current < end;
     }
   });
-  console.log(`現在の時刻: ${now.getHours()}時${now.getMinutes()}分 → ブロック中？`, result);
-  return result;
 };
 
+// ✅ 現在時刻を更新 & ボタン制御
 const updateNowTime = () => {
   const now = new Date();
   const h = zeroPad(now.getHours(), 2);
@@ -68,21 +68,25 @@ const updateNowTime = () => {
 setInterval(updateNowTime, 1000);
 updateNowTime();
 
+// ✅ タイマー初期化
 const setupTimer = () => {
   passTime = 0;
   passBackup = 0;
   wrapBackup = 0;
+  timerPar.style.color = "white";
   minutesLbl.innerText = zeroPad(0, 3);
   secondsLbl.innerText = zeroPad(0, 2);
   elapsedMinutesLbl.innerText = zeroPad(0, 2);
   elapsedSecondsLbl.innerText = zeroPad(0, 2);
 };
 
+// ✅ 経過時間取得
 const getPassTime = () => {
   const currentTime = new Date().getTime();
   return passBackup + Math.floor((currentTime - startTime) / 1000);
 };
 
+// ✅ カウントアップ
 const countUp = () => {
   passTime = getPassTime();
   const totalSeconds = passTime;
@@ -92,9 +96,8 @@ const countUp = () => {
   elapsedSecondsLbl.innerText = zeroPad(totalSeconds % 60, 2);
 };
 
+// ✅ タイマー開始
 const startTimer = () => {
-  console.log("🔵 開始ボタンが押された。ブロック中？", isBlockedTime());
-
   if (isBlockedTime()) {
     alert("現在の時間帯ではタイマーを開始できません。");
     return;
@@ -109,7 +112,7 @@ const startTimer = () => {
     if (isBlockedTime()) {
       clearInterval(timer);
       timer = null;
-      alert("⚠️ ブロック時間に入ったため、タイマーを停止しました。");
+      alert("ブロック時間に入ったため、タイマーを停止しました。");
       wrapBtn.disabled = true;
       startBtn.disabled = true;
       return;
@@ -118,6 +121,7 @@ const startTimer = () => {
   }, 100);
 };
 
+// ✅ タイマーリセット
 const resetTimer = () => {
   clearInterval(timer);
   timer = null;
@@ -131,6 +135,7 @@ const resetTimer = () => {
   }
 };
 
+// ✅ ラップ処理
 const addWrap = () => {
   if (startBtn.disabled === false) return;
   const wrapTime = passTime - wrapBackup;
@@ -146,10 +151,10 @@ const addWrap = () => {
   wrapList.push(text);
 };
 
+// ✅ イベント登録
 window.addEventListener("load", () => {
   setupTimer();
   startBtn.addEventListener("click", startTimer);
   resetBtn.addEventListener("click", resetTimer);
   wrapBtn.addEventListener("click", addWrap);
 });
-
