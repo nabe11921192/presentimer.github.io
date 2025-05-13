@@ -112,6 +112,7 @@
 </head>
 <body>
   <p id="now_time">--:--:--</p>
+
   <section id="main">
     <p id="timer">
       <span id="minutes">000</span><span class="unit">分</span>
@@ -121,11 +122,13 @@
       経過時間 <span id="elapsed_minutes">00</span>分 <span id="elapsed_seconds">00</span>秒
     </p>
   </section>
+
   <section id="controller">
     <button id="reset">リセット</button>
     <button id="startButton">開始</button>
     <button id="wrap">ラップ</button>
   </section>
+
   <section id="wrapWrapper">
     <h1>ラップタイム</h1>
     <ol id="wrapList"></ol>
@@ -138,6 +141,7 @@
     const elapsedMinutesLbl = document.getElementById("elapsed_minutes");
     const elapsedSecondsLbl = document.getElementById("elapsed_seconds");
     const nowTimeLbl = document.getElementById("now_time");
+
     const startBtn = document.getElementById("startButton");
     const resetBtn = document.getElementById("reset");
     const wrapBtn = document.getElementById("wrap");
@@ -146,7 +150,6 @@
     let timer = null;
     let startTime = 0;
     let passTime = 0;
-    let passBackup = 0;
     let wrapBackup = 0;
     let wrapList = [];
 
@@ -185,13 +188,11 @@
       nowTimeLbl.innerText = `${h}時${m}分${s}秒`;
       if (!timer) startBtn.disabled = false;
     };
-
     setInterval(updateNowTime, 1000);
     updateNowTime();
 
     const setupTimer = () => {
       passTime = 0;
-      passBackup = 0;
       wrapBackup = 0;
       timerPar.style.color = "white";
       minutesLbl.innerText = zeroPad(0, 3);
@@ -202,7 +203,7 @@
 
     const getPassTime = () => {
       const currentTime = new Date().getTime();
-      return passBackup + Math.floor((currentTime - startTime) / 1000);
+      return Math.floor((currentTime - startTime) / 1000);
     };
 
     const countUp = () => {
@@ -251,18 +252,20 @@
 
     const addWrap = () => {
       if (!timer) return;
+
       const wrapTime = passTime - wrapBackup;
       wrapBackup = passTime;
+
       const wrapMinute = zeroPad(Math.floor(wrapTime / 60), 2);
       const wrapSecond = zeroPad(wrapTime % 60, 2);
       const wrapIndex = wrapList.length + 1;
       const text = `${wrapIndex}回目 ${wrapMinute}分${wrapSecond}秒`;
+
       const li = document.createElement("li");
       li.className = "wrap_item";
       li.textContent = text;
       wrapListDom.appendChild(li);
       wrapList.push(text);
-      passBackup = passTime;
     };
 
     window.addEventListener("load", () => {
