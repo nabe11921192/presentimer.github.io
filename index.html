@@ -123,16 +123,9 @@
     const zeroPad = (num, digits) => String(num).padStart(digits, "0");
 
     const blockedTimeRanges = [
-      ["10:15", "10:25"],
-      ["12:15", "13:00"],
-      ["15:00", "15:10"],
-      ["17:10", "17:20"],
-      ["19:20", "19:30"],
-      ["22:15", "22:25"],
-      ["00:15", "01:00"],
-      ["03:00", "03:10"],
-      ["05:10", "05:20"],
-      ["07:20", "07:30"]
+      ["10:15", "10:25"], ["12:15", "13:00"], ["15:00", "15:10"],
+      ["17:10", "17:20"], ["19:20", "19:30"], ["22:15", "22:25"],
+      ["00:15", "01:00"], ["03:00", "03:10"], ["05:10", "05:20"], ["07:20", "07:30"]
     ];
 
     const isBlockedTime = () => {
@@ -150,10 +143,19 @@
     const updateNowTime = () => {
       const now = new Date();
       nowTimeLbl.innerText = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}:${zeroPad(now.getSeconds(),2)}`;
-      if (!timer && isBlockedTime()) {
+
+      if (isBlockedTime()) {
+        if (timer) {
+          clearInterval(timer);
+          timer = null;
+        }
         startBtn.disabled = true;
-      } else if (!timer) {
-        startBtn.disabled = false;
+        wrapBtn.disabled = true;
+      } else {
+        if (!timer) {
+          startBtn.disabled = false;
+          wrapBtn.disabled = false;
+        }
       }
     };
     setInterval(updateNowTime, 1000);
@@ -168,18 +170,13 @@
     const getPassTime = () => Math.floor((new Date().getTime() - startTime) / 1000);
 
     const countUp = () => {
-      if (isBlockedTime()) {
-        clearInterval(timer);
-        timer = null;
-        startBtn.disabled = false;
-        return;
-      }
       passTime = getPassTime();
       minutesLbl.innerText = zeroPad(Math.floor(passTime / 60), 3);
       secondsLbl.innerText = zeroPad(passTime % 60, 2);
     };
 
     const startTimer = () => {
+      if (isBlockedTime()) return;
       if (timer) clearInterval(timer);
       startBtn.disabled = true;
       wrapBtn.disabled = false;
@@ -192,7 +189,7 @@
       clearInterval(timer);
       timer = null;
       setupTimer();
-      startBtn.disabled = false;
+      startBtn.disabled = isBlockedTime();
       wrapBtn.disabled = true;
       wrapList = [];
       wrapListDom.innerHTML = "";
