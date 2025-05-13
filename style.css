@@ -16,20 +16,18 @@ html, body {
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-  color: white;
 }
 
-/* リセットボタン：左上固定 */
+/* リセットボタン：左上 */
 #reset {
   position: fixed;
   top: 2vh;
   left: 2vw;
   font-size: 3vh;
   padding: 1vh 2vw;
-  z-index: 10;
 }
 
-/* タイマー表示エリア */
+/* タイマー表示（大きく） */
 section#main {
   display: flex;
   justify-content: center;
@@ -40,42 +38,43 @@ section#main {
 
 span#minutes,
 span#seconds {
-  font-size: 30vh;
+  font-size: 34vh; /* 再度大きく */
 }
 
-/* 経過系は非表示 */
+/* 経過表示は削除 */
 p#status,
 p#elapsed_timer {
   display: none !important;
 }
 
-/* ボタン配置 */
+/* ボタン配置：間隔を広く */
 section#controller {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 3vw;
+  gap: 10vw; /* 間隔を広げる */
   margin-top: 2vh;
 }
 
+/* ボタン */
 #startButton {
   font-size: 3vh;
   padding: 1vh 2vw;
 }
 
-/* ✅ ラップボタンを1.4倍に */
 #wrap {
-  font-size: 75.6px;         /* 54px × 1.4倍 */
-  padding: 2.1em 4.2em;      /* 元の1.5em 3em × 1.4倍 */
+  font-size: 75.6px;
+  padding: 2.1em 4.2em;
 }
 
-/* ラップタイムエリア */
+/* ✅ ラップタイム位置とサイズ */
 section#wrapWrapper {
   position: fixed;
-  top: 12vh;
+  top: 10vh;
   right: 2vw;
   max-height: 80vh;
-  width: 24vw;
+  width: auto;
+  min-width: 200px;
   overflow-y: auto;
   font-size: 3.5vh;
   text-align: left;
@@ -92,7 +91,6 @@ ol#wrapList li.wrap_item {
   font-size: 3.5vh;
 }
 
-/* スクロールバーのデザイン */
 ol#wrapList::-webkit-scrollbar {
   width: 5px;
 }
@@ -102,7 +100,6 @@ ol#wrapList::-webkit-scrollbar-thumb {
   border-radius: 5px;
 }
 
-/* フッター非表示 */
 footer {
   display: none;
 }
