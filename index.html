@@ -119,13 +119,21 @@
     let passTime = 0;
     let wrapList = [];
     let lastStartDate = null;
+    let isPausedByBlock = false;
 
     const zeroPad = (num, digits) => String(num).padStart(digits, "0");
 
     const blockedTimeRanges = [
-      ["10:15", "10:25"], ["12:15", "13:00"], ["15:00", "15:10"],
-      ["17:10", "17:20"], ["19:20", "19:30"], ["22:15", "22:25"],
-      ["00:15", "01:00"], ["03:00", "03:10"], ["05:10", "05:20"], ["07:20", "07:30"]
+      ["10:15", "10:25"],
+      ["12:15", "13:00"],
+      ["15:00", "15:10"],
+      ["17:10", "17:20"],
+      ["19:20", "19:30"],
+      ["22:15", "22:25"],
+      ["00:15", "01:00"],
+      ["03:00", "03:10"],
+      ["05:10", "05:20"],
+      ["07:20", "07:30"]
     ];
 
     const isBlockedTime = () => {
@@ -148,14 +156,12 @@
         if (timer) {
           clearInterval(timer);
           timer = null;
+          isPausedByBlock = true;
         }
-        startBtn.disabled = true;
-        wrapBtn.disabled = true;
-      } else {
-        if (!timer) {
-          startBtn.disabled = false;
-          wrapBtn.disabled = false;
-        }
+      } else if (isPausedByBlock) {
+        isPausedByBlock = false;
+        timer = setInterval(countUp, 100);
+        startTime = new Date().getTime() - passTime * 1000;
       }
     };
     setInterval(updateNowTime, 1000);
@@ -176,8 +182,7 @@
     };
 
     const startTimer = () => {
-      if (isBlockedTime()) return;
-      if (timer) clearInterval(timer);
+      if (timer || passTime !== 0) return;
       startBtn.disabled = true;
       wrapBtn.disabled = false;
       startTime = new Date().getTime();
@@ -189,14 +194,19 @@
       clearInterval(timer);
       timer = null;
       setupTimer();
-      startBtn.disabled = isBlockedTime();
+      startBtn.disabled = false;
       wrapBtn.disabled = true;
       wrapList = [];
       wrapListDom.innerHTML = "";
     };
 
     const addWrap = () => {
+      if (!timer && passTime > 0) {
+        startTime = new Date().getTime() - passTime * 1000;
+        timer = setInterval(countUp, 100);
+      }
       if (!timer) return;
+
       const now = new Date();
       const wrapTime = Math.floor((now.getTime() - startTime) / 1000);
       const startStr = `${zeroPad(lastStartDate.getHours(),2)}:${zeroPad(lastStartDate.getMinutes(),2)}`;
