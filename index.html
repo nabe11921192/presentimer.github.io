@@ -1,31 +1,39 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>カウントアップタイマー</title>
-    <link href="style.css" rel="stylesheet" />
-    <script src="script.js" defer></script>
-  </head>
-  <body>
-    <section id="main">
-      <div class="inner">
-        <p id="status">経過</p>
-        <p id="timer"><span id="minutes">00</span>分 <span id="seconds">00</span>秒</p>
-        <p id="elapsed_timer">経過時間 <span id="elapsed_minutes">00</span>分 <span id="elapsed_seconds">00</span>秒</p>
-      </div>
-    </section>
-    <section id="controller">
-      <button id="reset">リセット</button>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <title>カウントアップタイマー</title>
+  <link href="style.css" rel="stylesheet" />
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <section id="main">
+    <div class="inner">
       <p id="now_time">--:--:--</p>
-      <button id="startButton">開始</button>
-      <button id="wrap">ラップ</button>
-    </section>
-    <section id="wrapWrapper">
-      <h1>ラップタイム</h1>
-      <ol id="wrapList"></ol>
-    </section>
-    <footer>
-      <p class="copyright">© 2019-2024 kyome22, tkkrr</p>
-    </footer>
-  </body>
+      <p id="timer">
+        <span id="minutes">000</span>分
+        <span id="seconds">00</span>秒
+      </p>
+      <!-- ↓以下は非表示だけどJS側で参照 -->
+      <p id="elapsed_timer" style="display:none;">
+        経過時間 <span id="elapsed_minutes">00</span>分 <span id="elapsed_seconds">00</span>秒
+      </p>
+    </div>
+  </section>
+
+  <section id="controller">
+    <button id="reset">リセット</button>
+    <button id="startButton">開始</button>
+    <button id="wrap">ラップ</button>
+  </section>
+
+  <section id="wrapWrapper">
+    <h1>ラップタイム</h1>
+    <ol id="wrapList"></ol>
+  </section>
+
+  <footer>
+    <p class="copyright">© 2019-2024 kyome22, tkkrr</p>
+  </footer>
+</body>
 </html>
