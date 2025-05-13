@@ -2,23 +2,141 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <title>カウントアップタイマー</title>
-  <link href="style.css" rel="stylesheet" />
-  <script src="script.js" defer></script>
+  <title>カウントアップラップタイマー</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #263238;
+      color: white;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-family: sans-serif;
+    }
+
+    #now_time {
+      font-size: 5.5vh;
+      position: fixed;
+      top: 1.5vh;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      text-align: center;
+    }
+
+    #reset {
+      position: fixed;
+      top: 2vh;
+      left: 2vw;
+      font-size: 2.5vh;
+      padding: 0.7vh 1.5vw;
+      z-index: 10;
+    }
+
+    section#main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10vh;
+    }
+
+    span#minutes,
+    span#seconds {
+      font-size: 26vh;
+    }
+
+    .unit {
+      font-size: 8vh;
+      margin: 0 1vw;
+      vertical-align: middle;
+    }
+
+    section#controller {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 4vw;
+      margin-bottom: 6vh;
+    }
+
+    #startButton {
+      font-size: 2.4vh;
+      padding: 1.2vh 2.4vw;
+      border-radius: 8px;
+      background-color: #fafafa;
+      color: #263238;
+      border: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    #wrap {
+      font-size: 3.1vh;
+      padding: 1.56vh 3.12vw;
+      border-radius: 12px;
+      background-color: #ffeb3b;
+      color: #000;
+      font-weight: bold;
+      border: 2px solid #fdd835;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      transition: transform 0.1s ease;
+    }
+
+    #wrap:hover {
+      transform: scale(1.05);
+    }
+
+    section#wrapWrapper {
+      position: fixed;
+      top: 10vh;
+      right: 2vw;
+      max-height: 75vh;
+      width: auto;
+      min-width: 200px;
+      overflow-y: auto;
+      font-size: 3vh;
+      text-align: left;
+    }
+
+    ol#wrapList {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    ol#wrapList li.wrap_item {
+      margin-bottom: 1vh;
+      white-space: nowrap;
+      font-size: 2.6vh;
+    }
+
+    ol#wrapList::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    ol#wrapList::-webkit-scrollbar-thumb {
+      background-color: rgba(255,255,255,0.3);
+      border-radius: 5px;
+    }
+
+    footer {
+      display: none;
+    }
+  </style>
 </head>
 <body>
+  <p id="now_time">--:--:--</p>
+
   <section id="main">
-    <div class="inner">
-      <p id="now_time">--:--:--</p>
-      <p id="timer">
-        <span id="minutes">000</span>分
-        <span id="seconds">00</span>秒
-      </p>
-      <!-- ↓以下は非表示だけどJS側で参照 -->
-      <p id="elapsed_timer" style="display:none;">
-        経過時間 <span id="elapsed_minutes">00</span>分 <span id="elapsed_seconds">00</span>秒
-      </p>
-    </div>
+    <p id="timer">
+      <span id="minutes">000</span><span class="unit">分</span>
+      <span id="seconds">00</span><span class="unit">秒</span>
+    </p>
+    <p id="elapsed_timer" style="display:none;">
+      経過時間 <span id="elapsed_minutes">00</span>分 <span id="elapsed_seconds">00</span>秒
+    </p>
   </section>
 
   <section id="controller">
@@ -32,8 +150,160 @@
     <ol id="wrapList"></ol>
   </section>
 
-  <footer>
-    <p class="copyright">© 2019-2024 kyome22, tkkrr</p>
-  </footer>
+  <script>
+    const timerPar = document.getElementById("timer");
+    const minutesLbl = document.getElementById("minutes");
+    const secondsLbl = document.getElementById("seconds");
+    const elapsedMinutesLbl = document.getElementById("elapsed_minutes");
+    const elapsedSecondsLbl = document.getElementById("elapsed_seconds");
+    const nowTimeLbl = document.getElementById("now_time");
+
+    const startBtn = document.getElementById("startButton");
+    const resetBtn = document.getElementById("reset");
+    const wrapBtn = document.getElementById("wrap");
+    const wrapListDom = document.getElementById("wrapList");
+
+    let timer = null;
+    let startTime = 0;
+    let passTime = 0;
+    let passBackup = 0;
+    let wrapBackup = 0;
+    let wrapList = [];
+
+    const zeroPad = (num, digits) => String(num).padStart(digits, "0");
+
+    const blockedTimeRanges = [
+      ["10:15", "10:25"],
+      ["12:15", "13:00"],
+      ["15:00", "15:10"],
+      ["17:10", "17:20"],
+      ["19:20", "19:30"],
+      ["22:15", "22:25"],
+      ["00:15", "01:00"],
+      ["03:00", "03:10"],
+      ["05:10", "05:20"],
+      ["07:20", "07:30"],
+    ];
+
+    const isBlockedTime = () => {
+      const now = new Date();
+      const current = `${zeroPad(now.getHours(), 2)}:${zeroPad(now.getMinutes(), 2)}`;
+      return blockedTimeRanges.some(([start, end]) => {
+        if (start > end) {
+          return current >= start || current < end;
+        } else {
+          return current >= start && current < end;
+        }
+      });
+    };
+
+    const updateNowTime = () => {
+      const now = new Date();
+      const h = zeroPad(now.getHours(), 2);
+      const m = zeroPad(now.getMinutes(), 2);
+      const s = zeroPad(now.getSeconds(), 2);
+      nowTimeLbl.innerText = `${h}時${m}分${s}秒`;
+
+      if (!timer) startBtn.disabled = false;
+    };
+    setInterval(updateNowTime, 1000);
+    updateNowTime();
+
+    const setupTimer = () => {
+      passTime = 0;
+      passBackup = 0;
+      wrapBackup = 0;
+      timerPar.style.color = "white";
+      minutesLbl.innerText = zeroPad(0, 3);
+      secondsLbl.innerText = zeroPad(0, 2);
+      elapsedMinutesLbl.innerText = zeroPad(0, 2);
+      elapsedSecondsLbl.innerText = zeroPad(0, 2);
+    };
+
+    const getPassTime = () => {
+      const currentTime = new Date().getTime();
+      return passBackup + Math.floor((currentTime - startTime) / 1000);
+    };
+
+    const countUp = () => {
+      passTime = getPassTime();
+      minutesLbl.innerText = zeroPad(Math.floor(passTime / 60), 3);
+      secondsLbl.innerText = zeroPad(passTime % 60, 2);
+      elapsedMinutesLbl.innerText = zeroPad(Math.floor(passTime / 60), 2);
+      elapsedSecondsLbl.innerText = zeroPad(passTime % 60, 2);
+    };
+
+    const startTimer = () => {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+
+      startBtn.disabled = true;
+      resetBtn.disabled = false;
+      wrapBtn.disabled = false;
+      startTime = new Date().getTime();
+
+      timer = setInterval(() => {
+        if (isBlockedTime()) {
+          clearInterval(timer);
+          timer = null;
+          wrapBtn.disabled = false;
+          startBtn.disabled = false;
+          return;
+        }
+        countUp();
+      }, 100);
+    };
+
+    const resetTimer = () => {
+      clearInterval(timer);
+      timer = null;
+      setupTimer();
+      startBtn.disabled = false;
+      resetBtn.disabled = false;
+      wrapBtn.disabled = true;
+      wrapList = [];
+      while (wrapListDom.firstChild) {
+        wrapListDom.removeChild(wrapListDom.firstChild);
+      }
+    };
+
+    const addWrap = () => {
+      if (!timer && !isBlockedTime()) {
+        startTime = new Date().getTime();
+        timer = setInterval(() => {
+          if (isBlockedTime()) {
+            clearInterval(timer);
+            timer = null;
+            wrapBtn.disabled = false;
+            startBtn.disabled = false;
+            return;
+          }
+          countUp();
+        }, 100);
+      }
+
+      const wrapTime = passTime - wrapBackup;
+      wrapBackup = passTime;
+      const wrapMinute = zeroPad(Math.floor(wrapTime / 60), 2);
+      const wrapSecond = zeroPad(wrapTime % 60, 2);
+      const wrapIndex = wrapList.length + 1;
+      const text = `${wrapIndex}回目 ${wrapMinute}分${wrapSecond}秒`;
+      const li = document.createElement("li");
+      li.className = "wrap_item";
+      li.textContent = text;
+      wrapListDom.appendChild(li);
+      wrapList.push(text);
+      passBackup = passTime;
+    };
+
+    window.addEventListener("load", () => {
+      setupTimer();
+      startBtn.addEventListener("click", startTimer);
+      resetBtn.addEventListener("click", resetTimer);
+      wrapBtn.addEventListener("click", addWrap);
+    });
+  </script>
 </body>
 </html>
