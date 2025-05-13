@@ -1,5 +1,6 @@
+// 要素の取得
 const timerPar = document.getElementById("timer");
-const statusLbl = document.getElementById("status");
+const statusLbl = document.getElementById("status"); // ※この行が不要なら削除可
 const minutesLbl = document.getElementById("minutes");
 const secondsLbl = document.getElementById("seconds");
 const elapsedMinutesLbl = document.getElementById("elapsed_minutes");
@@ -11,6 +12,7 @@ const resetBtn = document.getElementById("reset");
 const wrapBtn = document.getElementById("wrap");
 const wrapListDom = document.getElementById("wrapList");
 
+// タイマー用変数
 let timer;
 let startTime = 0;
 let passTime = 0;
@@ -18,46 +20,52 @@ let passBackup = 0;
 let wrapBackup = 0;
 let wrapList = [];
 
-const zeroPadding = (num) => ("00" + num).slice(-2);
+// ✅ 任意桁数でゼロ埋め
+const zeroPad = (num, digits) => String(num).padStart(digits, "0");
 
+// ✅ 現在時刻の表示
 const updateNowTime = () => {
   const now = new Date();
-  const h = zeroPadding(now.getHours());
-  const m = zeroPadding(now.getMinutes());
-  const s = zeroPadding(now.getSeconds());
+  const h = zeroPad(now.getHours(), 2);
+  const m = zeroPad(now.getMinutes(), 2);
+  const s = zeroPad(now.getSeconds(), 2);
   nowTimeLbl.innerText = `${h}時${m}分${s}秒`;
 };
 setInterval(updateNowTime, 1000);
 updateNowTime();
 
+// ✅ タイマー初期化
 const setupTimer = () => {
   passTime = 0;
   passBackup = 0;
   wrapBackup = 0;
   timerPar.style.color = "white";
-  minutesLbl.innerText = zeroPadding(0);
-  secondsLbl.innerText = zeroPadding(0);
-  elapsedMinutesLbl.innerText = zeroPadding(0);
-  elapsedSecondsLbl.innerText = zeroPadding(0);
+  minutesLbl.innerText = zeroPad(0, 3); // ← 3桁表示
+  secondsLbl.innerText = zeroPad(0, 2);
+  elapsedMinutesLbl.innerText = zeroPad(0, 2);
+  elapsedSecondsLbl.innerText = zeroPad(0, 2);
 };
 
+// ✅ 経過秒数を取得
 const getPassTime = () => {
   const currentTime = new Date().getTime();
   return passBackup + Math.floor((currentTime - startTime) / 1000);
 };
 
+// ✅ カウントアップ処理
 const countUp = () => {
   passTime = getPassTime();
   const totalSeconds = passTime;
   timerPar.style.color = "white";
-  minutesLbl.innerText = zeroPadding(Math.floor(totalSeconds / 60));
-  secondsLbl.innerText = zeroPadding(totalSeconds % 60);
-  elapsedMinutesLbl.innerText = zeroPadding(Math.floor(totalSeconds / 60));
-  elapsedSecondsLbl.innerText = zeroPadding(totalSeconds % 60);
+  minutesLbl.innerText = zeroPad(Math.floor(totalSeconds / 60), 3);
+  secondsLbl.innerText = zeroPad(totalSeconds % 60, 2);
+  elapsedMinutesLbl.innerText = zeroPad(Math.floor(totalSeconds / 60), 2);
+  elapsedSecondsLbl.innerText = zeroPad(totalSeconds % 60, 2);
 };
 
+// ✅ スタートボタン処理
 const startTimer = () => {
-  statusLbl.innerText = "経過";
+  // statusLbl.innerText = "経過"; // ← 表示したくなければ削除
   startBtn.disabled = true;
   resetBtn.disabled = false;
   wrapBtn.disabled = false;
@@ -65,10 +73,11 @@ const startTimer = () => {
   timer = setInterval(countUp, 100);
 };
 
+// ✅ リセット処理
 const resetTimer = () => {
   clearInterval(timer);
   setupTimer();
-  statusLbl.innerText = "経過";
+  // statusLbl.innerText = "経過"; // ← 表示したくなければ削除
   startBtn.disabled = false;
   resetBtn.disabled = false;
   wrapBtn.disabled = true;
@@ -78,12 +87,13 @@ const resetTimer = () => {
   }
 };
 
+// ✅ ラップ処理
 const addWrap = () => {
   if (startBtn.disabled === false) return;
   const wrapTime = passTime - wrapBackup;
   wrapBackup = passTime;
-  const wrapMinute = zeroPadding(Math.floor(wrapTime / 60));
-  const wrapSecond = zeroPadding(wrapTime % 60);
+  const wrapMinute = zeroPad(Math.floor(wrapTime / 60), 2);
+  const wrapSecond = zeroPad(wrapTime % 60, 2);
   const wrapIndex = wrapList.length + 1;
   const text = `${wrapIndex}回目 ${wrapMinute}分${wrapSecond}秒`;
   const li = document.createElement("li");
@@ -93,9 +103,11 @@ const addWrap = () => {
   wrapList.push(text);
 };
 
+// ✅ イベントバインド
 window.addEventListener("load", () => {
   setupTimer();
   startBtn.addEventListener("click", startTimer);
   resetBtn.addEventListener("click", resetTimer);
   wrapBtn.addEventListener("click", addWrap);
 });
+
