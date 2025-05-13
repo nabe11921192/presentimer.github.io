@@ -34,15 +34,29 @@
       display: flex; justify-content: center; align-items: center;
       gap: 4vw; margin-bottom: 6vh;
     }
-    #startButton, #reset {
+    #startButton, #reset, #wrap {
       font-size: 2.4vh; padding: 1.2vh 2.4vw;
-      border-radius: 8px; background-color: #fafafa;
-      color: #263238; border: none;
+      border-radius: 8px;
+      border: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: background-color 0.2s, transform 0.1s;
+      cursor: pointer;
+    }
+    #startButton {
+      background-color: #fafafa; color: #263238;
     }
     #wrap {
-      font-size: 3.1vh; padding: 1.56vh 3.12vw;
-      border-radius: 12px; background-color: #ffeb3b; color: #000;
-      font-weight: bold; border: 2px solid #fdd835;
+      font-size: 3.1vh;
+      background-color: #ffeb3b; color: #000; font-weight: bold;
+      border: 2px solid #fdd835;
+    }
+    #startButton:hover, #reset:hover, #wrap:hover {
+      transform: scale(1.05);
+    }
+    #startButton:disabled, #wrap:disabled, #reset:disabled {
+      background-color: #aaa;
+      color: #444;
+      cursor: not-allowed;
     }
     section#wrapWrapper {
       position: fixed; top: 10vh; right: 2vw;
