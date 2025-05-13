@@ -124,7 +124,7 @@
     const zeroPad = (num, digits) => String(num).padStart(digits, "0");
 
     const blockedTimeRanges = [
-      ["17:50", "17:55"],
+      ["18:00", "18:05"],
       ["10:15", "10:25"],
       ["12:15", "13:00"],
       ["15:00", "15:10"],
@@ -205,25 +205,9 @@
       if (!timer && passTime > 0) {
         startTime = new Date().getTime() - passTime * 1000;
         timer = setInterval(countUp, 100);
+        return;
       }
       if (!timer) return;
-
-      const now = new Date();
-      const wrapTime = Math.floor((now.getTime() - startTime) / 1000);
-      const startStr = `${zeroPad(lastStartDate.getHours(),2)}:${zeroPad(lastStartDate.getMinutes(),2)}`;
-      const endStr = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
-      const wrapStr = `${zeroPad(Math.floor(wrapTime / 60),2)}分${zeroPad(wrapTime % 60,2)}秒`;
-      const text = `${wrapList.length+1}回目 ${startStr}～${endStr}　${wrapStr}`;
-
-      const li = document.createElement("li");
-      li.className = "wrap_item";
-      li.textContent = text;
-      wrapListDom.appendChild(li);
-      wrapList.push(text);
-
-      startTime = now.getTime();
-      lastStartDate = now;
-      passTime = 0;
     };
 
     window.addEventListener("load", () => {
