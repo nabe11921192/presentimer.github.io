@@ -1,5 +1,6 @@
 // 要素の取得
 const timerPar = document.getElementById("timer");
+const statusLbl = document.getElementById("status");
 const minutesLbl = document.getElementById("minutes");
 const secondsLbl = document.getElementById("seconds");
 const elapsedMinutesLbl = document.getElementById("elapsed_minutes");
@@ -12,7 +13,7 @@ const wrapBtn = document.getElementById("wrap");
 const wrapListDom = document.getElementById("wrapList");
 
 // タイマー用変数
-let timer = null;
+let timer;
 let startTime = 0;
 let passTime = 0;
 let passBackup = 0;
@@ -36,7 +37,7 @@ const blockedTimeRanges = [
   ["07:20", "07:30"],
 ];
 
-// ✅ 現在がブロック時間か判定（00:00 跨ぎ対応）
+// ✅ 現在がブロック時間か判定（数値比較）
 const isBlockedTime = () => {
   const now = new Date();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
@@ -56,7 +57,7 @@ const isBlockedTime = () => {
   });
 };
 
-// ✅ 現在時刻の表示 & ブロック状態によるボタン制御
+// ✅ 現在時刻の表示 & ボタン有効化制御
 const updateNowTime = () => {
   const now = new Date();
   const h = zeroPad(now.getHours(), 2);
@@ -74,7 +75,7 @@ const updateNowTime = () => {
 setInterval(updateNowTime, 1000);
 updateNowTime();
 
-// ✅ 初期化
+// ✅ タイマー初期化
 const setupTimer = () => {
   passTime = 0;
   passBackup = 0;
@@ -86,23 +87,24 @@ const setupTimer = () => {
   elapsedSecondsLbl.innerText = zeroPad(0, 2);
 };
 
-// ✅ 経過秒数
+// ✅ 経過秒数を取得
 const getPassTime = () => {
   const currentTime = new Date().getTime();
   return passBackup + Math.floor((currentTime - startTime) / 1000);
 };
 
-// ✅ カウントアップ
+// ✅ カウントアップ処理
 const countUp = () => {
   passTime = getPassTime();
   const totalSeconds = passTime;
+  timerPar.style.color = "white";
   minutesLbl.innerText = zeroPad(Math.floor(totalSeconds / 60), 3);
   secondsLbl.innerText = zeroPad(totalSeconds % 60, 2);
   elapsedMinutesLbl.innerText = zeroPad(Math.floor(totalSeconds / 60), 2);
   elapsedSecondsLbl.innerText = zeroPad(totalSeconds % 60, 2);
 };
 
-// ✅ スタート処理
+// ✅ スタート処理（ブロック中なら不可）
 const startTimer = () => {
   if (isBlockedTime()) {
     alert("現在の時間帯ではタイマーを開始できません。");
@@ -141,7 +143,7 @@ const resetTimer = () => {
   }
 };
 
-// ✅ ラップ
+// ✅ ラップ処理
 const addWrap = () => {
   if (startBtn.disabled === false) return;
   const wrapTime = passTime - wrapBackup;
@@ -157,7 +159,7 @@ const addWrap = () => {
   wrapList.push(text);
 };
 
-// ✅ イベント登録
+// ✅ イベントバインド
 window.addEventListener("load", () => {
   setupTimer();
   startBtn.addEventListener("click", startTimer);
