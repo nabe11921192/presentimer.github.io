@@ -11,8 +11,8 @@
       display: flex; flex-direction: column; justify-content: space-between;
     }
     #now_time {
-      font-size: 11.0vh; /* 1.5倍に拡大 */
-      position: fixed; top: 1vh; left: 50%; transform: translateX(-50%);
+      font-size: 11.0vh; /* 指定通りに拡大 */
+      position: fixed; top: 0.5vh; left: 50%; transform: translateX(-50%);
       z-index: 10;
     }
     #reset {
@@ -23,7 +23,7 @@
     section#main {
       flex: 1; display: flex;
       justify-content: center; align-items: center;
-      margin-top: 8vh;
+      margin-top: 10vh;
     }
     #minutes, #seconds {
       font-size: 26vh;
@@ -119,7 +119,7 @@
 
     const updateNowTime = () => {
       const now = new Date();
-      nowTimeLbl.innerText = `${zeroPad(now.getHours(),2)}時${zeroPad(now.getMinutes(),2)}分${zeroPad(now.getSeconds(),2)}秒`;
+      nowTimeLbl.innerText = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}:${zeroPad(now.getSeconds(),2)}`;
     };
     setInterval(updateNowTime, 1000);
     updateNowTime();
