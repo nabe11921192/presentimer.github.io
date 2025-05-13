@@ -11,7 +11,7 @@ html, body {
   font-family: sans-serif;
 }
 
-/* ✅ 上中央にリアルタイム時計 */
+/* ✅ 上中央に現在時刻 */
 #now_time {
   font-size: 5.5vh;
   position: fixed;
@@ -22,7 +22,7 @@ html, body {
   text-align: center;
 }
 
-/* ✅ リセットボタン：左上 */
+/* ✅ 左上のリセットボタン */
 #reset {
   position: fixed;
   top: 2vh;
@@ -32,7 +32,7 @@ html, body {
   z-index: 10;
 }
 
-/* ✅ タイマー表示（分・秒） */
+/* ✅ タイマーの数値表示 */
 section#main {
   flex: 1;
   display: flex;
@@ -43,23 +43,23 @@ section#main {
 
 span#minutes,
 span#seconds {
-  font-size: 52vh; /* 2倍拡大 */
+  font-size: 26vh; /* ← 数字のサイズは現状維持 */
 }
 
-/* ✅ 分・秒の単位 */
+/* ✅ 分・秒の単位だけ少し拡大 */
 .unit {
-  font-size: 18vh;
+  font-size: 8vh;
   margin: 0 1vw;
   vertical-align: middle;
 }
 
-/* 経過時間非表示 */
+/* 経過表示などは非表示 */
 p#status,
 p#elapsed_timer {
   display: none !important;
 }
 
-/* ✅ ボタンを上に移動 */
+/* ✅ 開始・ラップボタンの配置（少し上に） */
 section#controller {
   display: flex;
   justify-content: center;
@@ -68,7 +68,7 @@ section#controller {
   margin-bottom: 6vh;
 }
 
-/* ✅ 開始ボタン（通常） */
+/* 開始ボタン */
 #startButton {
   font-size: 2.4vh;
   padding: 1.2vh 2.4vw;
@@ -79,9 +79,9 @@ section#controller {
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* ✅ ラップボタン（1.3倍 & 強調） */
+/* ✅ ラップボタン（強調＆1.3倍） */
 #wrap {
-  font-size: 3.1vh;           /* 1.3倍 */
+  font-size: 3.1vh;
   padding: 1.56vh 3.12vw;
   border-radius: 12px;
   background-color: #ffeb3b;
@@ -96,7 +96,7 @@ section#controller {
   transform: scale(1.05);
 }
 
-/* ✅ ラップタイム：右上配置 */
+/* ✅ ラップタイム表示（右上） */
 section#wrapWrapper {
   position: fixed;
   top: 10vh;
