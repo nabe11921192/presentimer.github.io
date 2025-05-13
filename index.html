@@ -207,6 +207,23 @@
         return;
       }
       if (!timer) return;
+
+      const now = new Date();
+      const wrapTime = Math.floor((now.getTime() - startTime) / 1000);
+      const startStr = `${zeroPad(lastStartDate.getHours(),2)}:${zeroPad(lastStartDate.getMinutes(),2)}`;
+      const endStr = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
+      const wrapStr = `${zeroPad(Math.floor(wrapTime / 60),2)}分${zeroPad(wrapTime % 60,2)}秒`;
+      const text = `${wrapList.length+1}回目 ${startStr}～${endStr}　${wrapStr}`;
+
+      const li = document.createElement("li");
+      li.className = "wrap_item";
+      li.textContent = text;
+      wrapListDom.appendChild(li);
+      wrapList.push(text);
+
+      startTime = now.getTime();
+      lastStartDate = now;
+      passTime = 0;
     };
 
     window.addEventListener("load", () => {
