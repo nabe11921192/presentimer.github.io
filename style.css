@@ -8,74 +8,76 @@ html, body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  font-family: sans-serif;
 }
 
-/* 上のリアルタイム時計 */
+/* ✅ 上部のリアルタイム時計 */
 #now_time {
-  font-size: 6vh;
+  font-size: 5.5vh;
   margin-top: 1vh;
   text-align: center;
 }
 
-/* リセットボタン */
+/* ✅ リセットボタン：固定左上 */
 #reset {
   position: fixed;
   top: 2vh;
   left: 2vw;
-  font-size: 3vh;
-  padding: 1vh 2vw;
+  font-size: 2.5vh;
+  padding: 0.7vh 1.5vw;
   z-index: 10;
 }
 
-/* メインタイマー表示エリア */
+/* ✅ タイマー表示エリア */
 section#main {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 2vh;
+  margin-top: 1vh;
 }
 
 span#minutes,
 span#seconds {
-  font-size: 30vh;  /* ← 少し小さくして収める */
+  font-size: 26vh;
 }
 
-/* 経過は非表示 */
+/* 経過表示非表示 */
 p#status,
 p#elapsed_timer {
   display: none !important;
 }
 
-/* ボタンエリア */
+/* ✅ ボタン配置：横並び・等サイズ感 */
 section#controller {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 6vw;
-  margin-bottom: 4vh;
+  gap: 4vw;
+  margin-bottom: 3vh;
 }
 
-#startButton {
-  font-size: 3vh;
-  padding: 1vh 2vw;
-}
-
+#startButton,
 #wrap {
-  font-size: 75.6px;
-  padding: 2.1em 4.2em;
+  font-size: 2.4vh;
+  padding: 1.2vh 2.4vw;
+  border-radius: 8px;
+  background-color: #fafafa;
+  color: #263238;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* ラップタイム */
+/* ✅ ラップタイムを右上に */
 section#wrapWrapper {
   position: fixed;
   top: 10vh;
   right: 2vw;
-  max-height: 80vh;
+  max-height: 75vh;
   width: auto;
   min-width: 200px;
   overflow-y: auto;
-  font-size: 3.5vh;
+  font-size: 3vh;
   text-align: left;
 }
 
@@ -87,16 +89,16 @@ ol#wrapList {
 ol#wrapList li.wrap_item {
   margin-bottom: 1vh;
   white-space: nowrap;
-  font-size: 3.5vh;
+  font-size: 2.6vh;
 }
 
-/* スクロールバー */
+/* スクロールバー見やすく */
 ol#wrapList::-webkit-scrollbar {
   width: 5px;
 }
 
 ol#wrapList::-webkit-scrollbar-thumb {
-  background-color: rgba(255,255,255,0.4);
+  background-color: rgba(255,255,255,0.3);
   border-radius: 5px;
 }
 
