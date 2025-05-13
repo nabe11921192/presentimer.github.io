@@ -22,7 +22,7 @@ html, body {
   text-align: center;
 }
 
-/* リセットボタン：左上 */
+/* ✅ リセットボタン：左上 */
 #reset {
   position: fixed;
   top: 2vh;
@@ -32,7 +32,7 @@ html, body {
   z-index: 10;
 }
 
-/* タイマー表示エリア */
+/* ✅ タイマー表示（分・秒） */
 section#main {
   flex: 1;
   display: flex;
@@ -43,25 +43,32 @@ section#main {
 
 span#minutes,
 span#seconds {
-  font-size: 26vh;
+  font-size: 52vh; /* 2倍拡大 */
 }
 
-/* 経過表示非表示 */
+/* ✅ 分・秒の単位 */
+.unit {
+  font-size: 18vh;
+  margin: 0 1vw;
+  vertical-align: middle;
+}
+
+/* 経過時間非表示 */
 p#status,
 p#elapsed_timer {
   display: none !important;
 }
 
-/* ✅ ボタンエリア */
+/* ✅ ボタンを上に移動 */
 section#controller {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 4vw;
-  margin-bottom: 3vh;
+  margin-bottom: 6vh;
 }
 
-/* 開始ボタン */
+/* ✅ 開始ボタン（通常） */
 #startButton {
   font-size: 2.4vh;
   padding: 1.2vh 2.4vw;
@@ -72,10 +79,10 @@ section#controller {
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* ✅ ラップボタン：目立たせて差別化 */
+/* ✅ ラップボタン（1.3倍 & 強調） */
 #wrap {
-  font-size: 2.8vh;
-  padding: 1.6vh 3.2vw;
+  font-size: 3.1vh;           /* 1.3倍 */
+  padding: 1.56vh 3.12vw;
   border-radius: 12px;
   background-color: #ffeb3b;
   color: #000;
@@ -89,7 +96,7 @@ section#controller {
   transform: scale(1.05);
 }
 
-/* ラップタイム */
+/* ✅ ラップタイム：右上配置 */
 section#wrapWrapper {
   position: fixed;
   top: 10vh;
@@ -123,6 +130,7 @@ ol#wrapList::-webkit-scrollbar-thumb {
   border-radius: 5px;
 }
 
+/* フッター非表示 */
 footer {
   display: none;
 }
