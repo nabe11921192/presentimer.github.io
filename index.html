@@ -40,11 +40,21 @@
       background-color: #e91e63;
       color: white;
     }
+    #resetHidden {
+      position: fixed;
+      top: 2vh;
+      right: 2vw;
+      width: 10vw;
+      height: 5vh;
+      background: transparent;
+      border: none;
+      z-index: 11;
+    }
     section#main {
       flex: 1; display: flex;
       justify-content: flex-start; align-items: center;
       margin-top: 25vh;
-      padding-left: 4vw;
+      padding-left: 6vw;
     }
     #minutes, #seconds {
       font-size: 26vh;
@@ -103,6 +113,7 @@
 <body>
   <p id="title_area"></p>
   <p id="now_time">--:--:--</p>
+  <button id="resetHidden" aria-label="hidden reset"></button>
   <section id="main">
     <p id="timer">
       <span id="minutes">000</span><span class="unit">分</span>
@@ -127,6 +138,7 @@
     const resetBtn = document.getElementById("reset");
     const wrapBtn = document.getElementById("wrap");
     const wrapListDom = document.getElementById("wrapList");
+    const hiddenResetBtn = document.getElementById("resetHidden");
 
     let timer = null;
     let startTime = 0;
@@ -144,27 +156,17 @@
     const zeroPad = (num, digits) => String(num).padStart(digits, "0");
 
     const blockedTimeRanges = [
-      ["10:15", "10:25"],
-      ["12:15", "13:00"],
-      ["15:00", "15:10"],
-      ["17:10", "17:20"],
-      ["19:20", "19:30"],
-      ["22:15", "22:25"],
-      ["00:15", "01:00"],
-      ["03:00", "03:10"],
-      ["05:10", "05:20"],
-      ["07:20", "07:30"]
+      ["10:15", "10:25"], ["12:15", "13:00"], ["15:00", "15:10"],
+      ["17:10", "17:20"], ["19:20", "19:30"], ["22:15", "22:25"],
+      ["00:15", "01:00"], ["03:00", "03:10"], ["05:10", "05:20"], ["07:20", "07:30"]
     ];
 
     const isBlockedTime = () => {
       const now = new Date();
       const current = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
       return blockedTimeRanges.some(([start, end]) => {
-        if (start > end) {
-          return current >= start || current < end;
-        } else {
-          return current >= start && current < end;
-        }
+        if (start > end) return current >= start || current < end;
+        return current >= start && current < end;
       });
     };
 
@@ -212,6 +214,16 @@
 
     const resetTimer = () => {
       downloadMemo();
+      clearInterval(timer);
+      timer = null;
+      setupTimer();
+      startBtn.disabled = false;
+      wrapBtn.disabled = true;
+      wrapList = [];
+      wrapListDom.innerHTML = "";
+    };
+
+    const softReset = () => {
       clearInterval(timer);
       timer = null;
       setupTimer();
@@ -269,6 +281,7 @@
       startBtn.addEventListener("click", startTimer);
       resetBtn.addEventListener("click", resetTimer);
       wrapBtn.addEventListener("click", addWrap);
+      hiddenResetBtn.addEventListener("click", softReset);
     });
   </script>
 </body>
