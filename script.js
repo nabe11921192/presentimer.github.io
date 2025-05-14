@@ -11,6 +11,20 @@ const resetBtn = document.getElementById("reset");
 const wrapBtn = document.getElementById("wrap");
 const wrapListDom = document.getElementById("wrapList");
 
+const logBox = document.createElement("textarea");
+logBox.id = "logBox";
+logBox.style.position = "fixed";
+logBox.style.top = "2vh";
+logBox.style.left = "2vw";
+logBox.style.width = "30vw";
+logBox.style.height = "20vh";
+logBox.style.zIndex = "999";
+logBox.style.backgroundColor = "#111";
+logBox.style.color = "#0f0";
+logBox.style.fontSize = "1.5vh";
+logBox.style.border = "1px solid #888";
+document.body.appendChild(logBox);
+
 // ✅ タイマー変数
 let timer = null;
 let startTime = 0;
@@ -114,6 +128,7 @@ const startTimer = () => {
     }
     countUp();
   }, 100);
+  logBox.value += "▶️ タイマー開始\n";
 };
 
 // ✅ タイマーリセット
@@ -128,6 +143,7 @@ const resetTimer = () => {
   while (wrapListDom.firstChild) {
     wrapListDom.removeChild(wrapListDom.firstChild);
   }
+  logBox.value += "🔁 リセット実行\n";
 };
 
 // ✅ ラップ処理（停止中は再開のみ、記録しない）
@@ -145,6 +161,7 @@ const addWrap = () => {
       }
       countUp();
     }, 100);
+    logBox.value += "🔄 タイマー再開（停止中にラップ押下）\n";
     return; // 再開のみ、記録はしない
   }
 
@@ -163,6 +180,7 @@ const addWrap = () => {
   wrapListDom.appendChild(li);
   wrapList.push(text);
   passBackup = passTime;
+  logBox.value += `📌 ラップ記録：${text}\n`;
 };
 
 // ✅ イベント登録
