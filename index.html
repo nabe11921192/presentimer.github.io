@@ -11,28 +11,19 @@
       display: flex; flex-direction: column; justify-content: space-between;
     }
     #now_time {
-      font-size: 11vh;
-      position: fixed;
-      top: 1vh;
-      left: 50%;
-      transform: translateX(-50%);
+      font-size: 5vh;
+      position: fixed; top: 1vh; left: 50%; transform: translateX(-50%);
       z-index: 10;
-      padding: 0.5vh 2vw;
-      border: 2px solid white;
-      border-radius: 10px;
     }
     #reset {
-      position: fixed;
-      top: 2vh;
-      left: 2vw;
-      font-size: 2.5vh;
-      padding: 0.7vh 1.5vw;
+      position: fixed; top: 2vh; left: 2vw;
+      font-size: 2.5vh; padding: 0.7vh 1.5vw;
       z-index: 10;
     }
     section#main {
       flex: 1; display: flex;
       justify-content: center; align-items: center;
-      margin-top: 20vh;
+      margin-top: 8vh;
     }
     #minutes, #seconds {
       font-size: 26vh;
@@ -55,7 +46,7 @@
     }
     #wrap {
       font-size: 3.1vh;
-      padding: 6vh 7.2vw;
+      padding: 3.12vh 3.12vw;
       border-radius: 12px;
       background-color: #ffeb3b;
       color: #000;
@@ -119,50 +110,12 @@
     let passTime = 0;
     let wrapList = [];
     let lastStartDate = null;
-    let isPausedByBlock = false;
 
     const zeroPad = (num, digits) => String(num).padStart(digits, "0");
 
-    const blockedTimeRanges = [
-      ["10:15", "10:25"],
-      ["12:15", "13:00"],
-      ["15:00", "15:10"],
-      ["17:10", "17:20"],
-      ["19:20", "19:30"],
-      ["22:15", "22:25"],
-      ["00:15", "01:00"],
-      ["03:00", "03:10"],
-      ["05:10", "05:20"],
-      ["07:20", "07:30"]
-    ];
-
-    const isBlockedTime = () => {
-      const now = new Date();
-      const current = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
-      return blockedTimeRanges.some(([start, end]) => {
-        if (start > end) {
-          return current >= start || current < end;
-        } else {
-          return current >= start && current < end;
-        }
-      });
-    };
-
     const updateNowTime = () => {
       const now = new Date();
-      nowTimeLbl.innerText = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}:${zeroPad(now.getSeconds(),2)}`;
-
-      if (isBlockedTime()) {
-        if (timer) {
-          clearInterval(timer);
-          timer = null;
-          isPausedByBlock = true;
-        }
-      } else if (isPausedByBlock) {
-        isPausedByBlock = false;
-        timer = setInterval(countUp, 100);
-        startTime = new Date().getTime() - passTime * 1000;
-      }
+      nowTimeLbl.innerText = `${zeroPad(now.getHours(),2)}時${zeroPad(now.getMinutes(),2)}分${zeroPad(now.getSeconds(),2)}秒`;
     };
     setInterval(updateNowTime, 1000);
     updateNowTime();
@@ -182,7 +135,7 @@
     };
 
     const startTimer = () => {
-      if (timer || passTime !== 0) return;
+      if (timer) clearInterval(timer);
       startBtn.disabled = true;
       wrapBtn.disabled = false;
       startTime = new Date().getTime();
@@ -191,6 +144,7 @@
     };
 
     const resetTimer = () => {
+      downloadMemo();
       clearInterval(timer);
       timer = null;
       setupTimer();
@@ -201,29 +155,36 @@
     };
 
     const addWrap = () => {
-      if (!timer && passTime > 0) {
-        startTime = new Date().getTime() - passTime * 1000;
-        timer = setInterval(countUp, 100);
-        return;
-      }
       if (!timer) return;
-
       const now = new Date();
       const wrapTime = Math.floor((now.getTime() - startTime) / 1000);
       const startStr = `${zeroPad(lastStartDate.getHours(),2)}:${zeroPad(lastStartDate.getMinutes(),2)}`;
       const endStr = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
       const wrapStr = `${zeroPad(Math.floor(wrapTime / 60),2)}分${zeroPad(wrapTime % 60,2)}秒`;
       const text = `${wrapList.length+1}回目 ${startStr}～${endStr}　${wrapStr}`;
-
       const li = document.createElement("li");
       li.className = "wrap_item";
       li.textContent = text;
       wrapListDom.appendChild(li);
       wrapList.push(text);
-
       startTime = now.getTime();
       lastStartDate = now;
       passTime = 0;
+    };
+
+    const downloadMemo = () => {
+      if (wrapList.length === 0) return;
+      const now = new Date();
+      const fileName = `ラップタイム_${zeroPad(now.getFullYear(),4)}${zeroPad(now.getMonth()+1,2)}${zeroPad(now.getDate(),2)}_${zeroPad(now.getHours(),2)}${zeroPad(now.getMinutes(),2)}${zeroPad(now.getSeconds(),2)}.txt`;
+      const header = "【ラップタイム記録】\n\n";
+      const body = wrapList.join("\n");
+      const blob = new Blob([header + body], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
     };
 
     window.addEventListener("load", () => {
