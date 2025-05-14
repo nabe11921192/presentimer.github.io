@@ -11,20 +11,6 @@ const resetBtn = document.getElementById("reset");
 const wrapBtn = document.getElementById("wrap");
 const wrapListDom = document.getElementById("wrapList");
 
-const logBox = document.createElement("textarea");
-logBox.id = "logBox";
-logBox.style.position = "fixed";
-logBox.style.top = "2vh";
-logBox.style.left = "2vw";
-logBox.style.width = "30vw";
-logBox.style.height = "20vh";
-logBox.style.zIndex = "999";
-logBox.style.backgroundColor = "#111";
-logBox.style.color = "#0f0";
-logBox.style.fontSize = "1.5vh";
-logBox.style.border = "1px solid #888";
-document.body.appendChild(logBox);
-
 // ✅ タイマー変数
 let timer = null;
 let startTime = 0;
@@ -32,7 +18,6 @@ let passTime = 0;
 let passBackup = 0;
 let wrapBackup = 0;
 let wrapList = [];
-let isManuallyStopped = false;
 
 // ✅ ゼロ埋め関数
 const zeroPad = (num, digits) => String(num).padStart(digits, "0");
@@ -72,6 +57,7 @@ const updateNowTime = () => {
   const s = zeroPad(now.getSeconds(), 2);
   nowTimeLbl.innerText = `${h}時${m}分${s}秒`;
 
+  // 停止中なら常にボタンを有効化
   if (!timer) {
     startBtn.disabled = false;
   }
@@ -114,7 +100,6 @@ const startTimer = () => {
     timer = null;
   }
 
-  isManuallyStopped = false;
   startBtn.disabled = true;
   resetBtn.disabled = false;
   wrapBtn.disabled = false;
@@ -130,7 +115,6 @@ const startTimer = () => {
     }
     countUp();
   }, 100);
-  logBox.value += "▶️ タイマー開始\n";
 };
 
 // ✅ タイマーリセット
@@ -145,38 +129,12 @@ const resetTimer = () => {
   while (wrapListDom.firstChild) {
     wrapListDom.removeChild(wrapListDom.firstChild);
   }
-  logBox.value += "🔁 リセット実行\n";
 };
 
-// ✅ 秒クリックで一時停止・再開
-secondsLbl.addEventListener("click", () => {
-  if (timer) {
-    clearInterval(timer);
-    timer = null;
-    isManuallyStopped = true;
-    logBox.value += "⏸️ 停止（秒クリック）\n";
-  } else if (isManuallyStopped) {
-    isManuallyStopped = false;
-    timer = setInterval(() => {
-      if (isBlockedTime()) {
-        clearInterval(timer);
-        timer = null;
-        wrapBtn.disabled = false;
-        startBtn.disabled = false;
-        return;
-      }
-      countUp();
-    }, 100);
-    startTime = new Date().getTime() - passTime * 1000;
-    logBox.value += "▶️ 再開（秒クリック）\n";
-  }
-});
-
-// ✅ ラップ処理（停止中は再開のみ、記録しない）
+// ✅ ラップ処理（停止中でも再開）
 const addWrap = () => {
-  // タイマー停止中でpassTimeがあれば再開、ラップは記録しない
-  if (!timer && passTime > 0 && !isBlockedTime() && isManuallyStopped) {
-    startTime = new Date().getTime() - passTime * 1000;
+  if (!timer && !isBlockedTime()) {
+    startTime = new Date().getTime();
     timer = setInterval(() => {
       if (isBlockedTime()) {
         clearInterval(timer);
@@ -187,12 +145,7 @@ const addWrap = () => {
       }
       countUp();
     }, 100);
-    logBox.value += "🔄 タイマー再開（停止中にラップ押下）\n";
-    return;
   }
-
-  // タイマーが無効 or 0秒の場合は何もしない
-  if (!timer || passTime === 0) return;
 
   const wrapTime = passTime - wrapBackup;
   wrapBackup = passTime;
@@ -206,7 +159,6 @@ const addWrap = () => {
   wrapListDom.appendChild(li);
   wrapList.push(text);
   passBackup = passTime;
-  logBox.value += `📌 ラップ記録：${text}\n`;
 };
 
 // ✅ イベント登録
@@ -218,3 +170,8 @@ window.addEventListener("load", () => {
 });
 
 console.log("✅ script.js 読み込まれました");
+
+startBtn.addEventListener("click", () => {
+  console.log("▶️ 開始ボタン押されました");
+  startTimer();
+});
