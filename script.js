@@ -57,7 +57,6 @@ const updateNowTime = () => {
   const s = zeroPad(now.getSeconds(), 2);
   nowTimeLbl.innerText = `${h}時${m}分${s}秒`;
 
-  // 停止中なら常にボタンを有効化
   if (!timer) {
     startBtn.disabled = false;
   }
@@ -131,10 +130,10 @@ const resetTimer = () => {
   }
 };
 
-// ✅ ラップ処理（停止中でも再開）
+// ✅ ラップ処理（停止中は再開だけして記録しない）
 const addWrap = () => {
-  if (!timer && !isBlockedTime()) {
-    startTime = new Date().getTime();
+  if (!timer && passTime > 0 && !isBlockedTime()) {
+    startTime = new Date().getTime() - passTime * 1000;
     timer = setInterval(() => {
       if (isBlockedTime()) {
         clearInterval(timer);
@@ -145,7 +144,10 @@ const addWrap = () => {
       }
       countUp();
     }, 100);
+    return; // 再開のみ、ラップは記録しない
   }
+
+  if (!timer) return;
 
   const wrapTime = passTime - wrapBackup;
   wrapBackup = passTime;
