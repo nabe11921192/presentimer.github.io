@@ -130,8 +130,9 @@ const resetTimer = () => {
   }
 };
 
-// ✅ ラップ処理（停止中は再開だけして記録しない）
+// ✅ ラップ処理（停止中は再開のみ、記録しない）
 const addWrap = () => {
+  // タイマー停止中でpassTimeがあれば再開、ラップは記録しない
   if (!timer && passTime > 0 && !isBlockedTime()) {
     startTime = new Date().getTime() - passTime * 1000;
     timer = setInterval(() => {
@@ -144,10 +145,11 @@ const addWrap = () => {
       }
       countUp();
     }, 100);
-    return; // 再開のみ、ラップは記録しない
+    return; // 再開のみ、記録はしない
   }
 
-  if (!timer) return;
+  // タイマーが無効 or 0秒の場合は何もしない
+  if (!timer || passTime === 0) return;
 
   const wrapTime = passTime - wrapBackup;
   wrapBackup = passTime;
