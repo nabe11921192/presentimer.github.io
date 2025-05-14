@@ -59,6 +59,9 @@
     #minutes, #seconds {
       font-size: 26vh;
     }
+    #seconds {
+      cursor: pointer;
+    }
     .unit {
       font-size: 8vh; margin: 0 1vw;
     }
@@ -238,7 +241,6 @@
       if (!timer && passTime > 0) {
         startTime = new Date().getTime() - passTime * 1000;
         timer = setInterval(countUp, 100);
-        return;
       }
       if (!timer) return;
 
@@ -284,6 +286,10 @@
       resetBtn.addEventListener("click", resetTimer);
       wrapBtn.addEventListener("click", addWrap);
       hiddenResetBtn.addEventListener("click", softReset);
+      secondsLbl.addEventListener("click", () => {
+        clearInterval(timer);
+        timer = null;
+      });
     });
   </script>
 </body>
