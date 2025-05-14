@@ -32,6 +32,7 @@ let passTime = 0;
 let passBackup = 0;
 let wrapBackup = 0;
 let wrapList = [];
+let isManuallyStopped = false;
 
 // ✅ ゼロ埋め関数
 const zeroPad = (num, digits) => String(num).padStart(digits, "0");
@@ -113,6 +114,7 @@ const startTimer = () => {
     timer = null;
   }
 
+  isManuallyStopped = false;
   startBtn.disabled = true;
   resetBtn.disabled = false;
   wrapBtn.disabled = false;
@@ -146,10 +148,34 @@ const resetTimer = () => {
   logBox.value += "🔁 リセット実行\n";
 };
 
+// ✅ 秒クリックで一時停止・再開
+secondsLbl.addEventListener("click", () => {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+    isManuallyStopped = true;
+    logBox.value += "⏸️ 停止（秒クリック）\n";
+  } else if (isManuallyStopped) {
+    isManuallyStopped = false;
+    timer = setInterval(() => {
+      if (isBlockedTime()) {
+        clearInterval(timer);
+        timer = null;
+        wrapBtn.disabled = false;
+        startBtn.disabled = false;
+        return;
+      }
+      countUp();
+    }, 100);
+    startTime = new Date().getTime() - passTime * 1000;
+    logBox.value += "▶️ 再開（秒クリック）\n";
+  }
+});
+
 // ✅ ラップ処理（停止中は再開のみ、記録しない）
 const addWrap = () => {
   // タイマー停止中でpassTimeがあれば再開、ラップは記録しない
-  if (!timer && passTime > 0 && !isBlockedTime()) {
+  if (!timer && passTime > 0 && !isBlockedTime() && isManuallyStopped) {
     startTime = new Date().getTime() - passTime * 1000;
     timer = setInterval(() => {
       if (isBlockedTime()) {
@@ -162,7 +188,7 @@ const addWrap = () => {
       countUp();
     }, 100);
     logBox.value += "🔄 タイマー再開（停止中にラップ押下）\n";
-    return; // 再開のみ、記録はしない
+    return;
   }
 
   // タイマーが無効 or 0秒の場合は何もしない
@@ -192,8 +218,3 @@ window.addEventListener("load", () => {
 });
 
 console.log("✅ script.js 読み込まれました");
-
-startBtn.addEventListener("click", () => {
-  console.log("▶️ 開始ボタン押されました");
-  startTimer();
-});
