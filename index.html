@@ -42,8 +42,9 @@
     }
     section#main {
       flex: 1; display: flex;
-      justify-content: center; align-items: center;
+      justify-content: flex-start; align-items: center;
       margin-top: 25vh;
+      padding-left: 4vw;
     }
     #minutes, #seconds {
       font-size: 26vh;
@@ -89,9 +90,9 @@
     }
     section#wrapWrapper {
       position: fixed;
-      top: 10vh;
+      top: 20vh;
       right: 2vw;
-      max-height: 80vh;
+      max-height: 75vh;
       overflow-y: auto;
       font-size: 3vh;
     }
@@ -249,7 +250,9 @@
     const downloadMemo = () => {
       if (wrapList.length === 0) return;
       const now = new Date();
-      const fileName = `ラップタイム_${zeroPad(now.getFullYear(),4)}${zeroPad(now.getMonth()+1,2)}${zeroPad(now.getDate(),2)}_${zeroPad(now.getHours(),2)}${zeroPad(now.getMinutes(),2)}${zeroPad(now.getSeconds(),2)}.txt`;
+      const dateStr = `${zeroPad(now.getFullYear(),4)}${zeroPad(now.getMonth()+1,2)}${zeroPad(now.getDate(),2)}_${zeroPad(now.getHours(),2)}${zeroPad(now.getMinutes(),2)}${zeroPad(now.getSeconds(),2)}`;
+      const titleSafe = customTitle.replace(/[^a-zA-Z0-9一-龯_]/g, '_');
+      const fileName = `${titleSafe}_ラップタイム_${dateStr}.txt`;
       const header = `【${customTitle || "作業者"} ラップタイム記録】\n\n`;
       const body = wrapList.join("\n");
       const blob = new Blob([header + body], { type: "text/plain" });
