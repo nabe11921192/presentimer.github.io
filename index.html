@@ -30,18 +30,6 @@
       border-radius: 12px;
       background-color: rgba(255,255,255,0.1);
     }
-    #logBox {
-      position: fixed;
-      top: 2vh;
-      left: 2vw;
-      width: 30vw;
-      height: 20vh;
-      z-index: 999;
-      background-color: #111;
-      color: #0f0;
-      font-size: 1.5vh;
-      border: 1px solid #888;
-    }
     #reset {
       position: fixed;
       bottom: 10vh;
@@ -70,9 +58,6 @@
     }
     #minutes, #seconds {
       font-size: 26vh;
-    }
-    #seconds {
-      cursor: pointer;
     }
     .unit {
       font-size: 8vh; margin: 0 1vw;
@@ -129,7 +114,6 @@
 <body>
   <p id="title_area"></p>
   <p id="now_time">--:--:--</p>
-  <textarea id="logBox" readonly></textarea>
   <button id="resetHidden" aria-label="hidden reset"></button>
   <section id="main">
     <p id="timer">
@@ -146,6 +130,161 @@
     <h1>ラップタイム</h1>
     <ol id="wrapList"></ol>
   </section>
-  <script src="script.js"></script>
+  <script>
+    const titleArea = document.getElementById("title_area");
+    const nowTimeLbl = document.getElementById("now_time");
+    const minutesLbl = document.getElementById("minutes");
+    const secondsLbl = document.getElementById("seconds");
+    const startBtn = document.getElementById("startButton");
+    const resetBtn = document.getElementById("reset");
+    const wrapBtn = document.getElementById("wrap");
+    const wrapListDom = document.getElementById("wrapList");
+    const hiddenResetBtn = document.getElementById("resetHidden");
+
+    let timer = null;
+    let startTime = 0;
+    let passTime = 0;
+    let wrapList = [];
+    let lastStartDate = null;
+    let isPausedByBlock = false;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const customTitle = urlParams.get("title") || "";
+    if (customTitle) {
+      titleArea.innerText = customTitle;
+    }
+
+    const zeroPad = (num, digits) => String(num).padStart(digits, "0");
+
+    const blockedTimeRanges = [
+      ["10:15", "10:25"], ["12:15", "13:00"], ["15:00", "15:10"],
+      ["17:10", "17:20"], ["19:20", "19:30"], ["22:15", "22:25"],
+      ["00:15", "01:00"], ["03:00", "03:10"], ["05:10", "05:20"], ["07:20", "07:30"]
+    ];
+
+    const isBlockedTime = () => {
+      const now = new Date();
+      const current = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
+      return blockedTimeRanges.some(([start, end]) => {
+        if (start > end) return current >= start || current < end;
+        return current >= start && current < end;
+      });
+    };
+
+    const updateNowTime = () => {
+      const now = new Date();
+      nowTimeLbl.innerText = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}:${zeroPad(now.getSeconds(),2)}`;
+
+      if (isBlockedTime()) {
+        if (timer) {
+          clearInterval(timer);
+          timer = null;
+          isPausedByBlock = true;
+        }
+      } else if (isPausedByBlock) {
+        isPausedByBlock = false;
+        timer = setInterval(countUp, 100);
+        startTime = new Date().getTime() - passTime * 1000;
+      }
+    };
+    setInterval(updateNowTime, 1000);
+    updateNowTime();
+
+    const setupTimer = () => {
+      passTime = 0;
+      minutesLbl.innerText = zeroPad(0, 3);
+      secondsLbl.innerText = zeroPad(0, 2);
+    };
+
+    const getPassTime = () => Math.floor((new Date().getTime() - startTime) / 1000);
+
+    const countUp = () => {
+      passTime = getPassTime();
+      minutesLbl.innerText = zeroPad(Math.floor(passTime / 60), 3);
+      secondsLbl.innerText = zeroPad(passTime % 60, 2);
+    };
+
+    const startTimer = () => {
+      if (timer || passTime !== 0) return;
+      startBtn.disabled = true;
+      wrapBtn.disabled = false;
+      startTime = new Date().getTime();
+      lastStartDate = new Date();
+      timer = setInterval(countUp, 100);
+    };
+
+    const resetTimer = () => {
+      downloadMemo();
+      clearInterval(timer);
+      timer = null;
+      setupTimer();
+      startBtn.disabled = false;
+      wrapBtn.disabled = true;
+      wrapList = [];
+      wrapListDom.innerHTML = "";
+    };
+
+    const softReset = () => {
+      clearInterval(timer);
+      timer = null;
+      setupTimer();
+      startBtn.disabled = false;
+      wrapBtn.disabled = true;
+      wrapList = [];
+      wrapListDom.innerHTML = "";
+    };
+
+    const addWrap = () => {
+      if (!timer && passTime > 0) {
+        startTime = new Date().getTime() - passTime * 1000;
+        timer = setInterval(countUp, 100);
+        return;
+      }
+      if (!timer) return;
+
+      const now = new Date();
+      const wrapTime = Math.floor((now.getTime() - startTime) / 1000);
+      const startStr = `${zeroPad(lastStartDate.getHours(),2)}:${zeroPad(lastStartDate.getMinutes(),2)}`;
+      const endStr = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
+      const wrapStr = `${zeroPad(Math.floor(wrapTime / 60),2)}分${zeroPad(wrapTime % 60,2)}秒`;
+      const text = `${wrapList.length+1}回目 ${startStr}～${endStr}　${wrapStr}`;
+
+      const li = document.createElement("li");
+      li.className = "wrap_item";
+      li.textContent = text;
+      if (wrapTime >= 1800) li.classList.add("over30");
+      wrapListDom.appendChild(li);
+      wrapList.push(text);
+
+      startTime = now.getTime();
+      lastStartDate = now;
+      passTime = 0;
+    };
+
+    const downloadMemo = () => {
+      if (wrapList.length === 0) return;
+      const now = new Date();
+      const dateStr = `${zeroPad(now.getFullYear(),4)}${zeroPad(now.getMonth()+1,2)}${zeroPad(now.getDate(),2)}_${zeroPad(now.getHours(),2)}${zeroPad(now.getMinutes(),2)}${zeroPad(now.getSeconds(),2)}`;
+      const titleSafe = customTitle.replace(/[^a-zA-Z0-9一-龯_]/g, '_');
+      const fileName = `${titleSafe}_ラップタイム_${dateStr}.txt`;
+      const header = `【${customTitle || "作業者"} ラップタイム記録】\n\n`;
+      const body = wrapList.join("\n");
+      const blob = new Blob([header + body], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    window.addEventListener("load", () => {
+      setupTimer();
+      startBtn.addEventListener("click", startTimer);
+      resetBtn.addEventListener("click", resetTimer);
+      wrapBtn.addEventListener("click", addWrap);
+      hiddenResetBtn.addEventListener("click", softReset);
+    });
+  </script>
 </body>
 </html>
