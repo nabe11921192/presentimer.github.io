@@ -51,8 +51,9 @@
       font-size: 2.5vh;
       padding: 0.7vh 1.5vw;
       z-index: 10;
-      background-color: #e91e63;
-      color: white;
+      background-color: #aa3a5e;  /* 落ち着いたピンク系（視認性あり） */
+      color: #ccc;
+      border: none;
     }
     section#main {
       flex: 1; display: flex;
@@ -147,7 +148,10 @@
     let passTime = 0;
     let wrapList = [];
     let lastStartDate = null;
+
     let isManuallyBlocked = false;
+    let pauseStartTime = 0;
+    let pausedDuration = 0;
 
     const urlParams = new URLSearchParams(window.location.search);
     const customTitle = urlParams.get("title") || "";
@@ -179,6 +183,7 @@
       if (isBlockedTime() && timer) {
         clearInterval(timer);
         timer = null;
+        pauseStartTime = new Date().getTime();
       }
     };
     setInterval(updateNowTime, 1000);
@@ -186,6 +191,7 @@
 
     const setupTimer = () => {
       passTime = 0;
+      pausedDuration = 0;
       minutesLbl.innerText = zeroPad(0, 3);
       secondsLbl.innerText = zeroPad(0, 2);
       wrapList = [];
@@ -193,7 +199,10 @@
       startTime = 0;
     };
 
-    const getPassTime = () => Math.floor((new Date().getTime() - startTime) / 1000);
+    const getPassTime = () => {
+      const now = new Date().getTime();
+      return Math.floor((now - startTime - pausedDuration) / 1000);
+    };
 
     const countUp = () => {
       passTime = getPassTime();
@@ -221,15 +230,17 @@
 
     const addWrap = () => {
       if (!timer) {
-        // 停止状態でも再始動してラップ可能
+        // 再始動処理（停止中でもOK）
         startTime = new Date().getTime();
         lastStartDate = new Date();
+        pausedDuration = 0;
         timer = setInterval(countUp, 100);
       }
+
       isManuallyBlocked = false;
 
       const now = new Date();
-      const wrapTime = Math.floor((now.getTime() - startTime) / 1000);
+      const wrapTime = Math.floor((now.getTime() - startTime - pausedDuration) / 1000);
       const startStr = `${zeroPad(lastStartDate.getHours(),2)}:${zeroPad(lastStartDate.getMinutes(),2)}`;
       const endStr = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
       const wrapStr = `${zeroPad(Math.floor(wrapTime / 60),2)}分${zeroPad(wrapTime % 60,2)}秒`;
@@ -245,6 +256,7 @@
 
       startTime = now.getTime();
       lastStartDate = now;
+      pausedDuration = 0;
       passTime = 0;
     };
 
@@ -253,7 +265,7 @@
       const dateStr = `${zeroPad(now.getFullYear(),4)}${zeroPad(now.getMonth()+1,2)}${zeroPad(now.getDate(),2)}_${zeroPad(now.getHours(),2)}${zeroPad(now.getMinutes(),2)}${zeroPad(now.getSeconds(),2)}`;
       const fileName = `ラップタイム_${dateStr}.txt`;
       const header = `【ラップタイム記録】\n\n`;
-      const body = wrapList.length > 0 ? wrapList.join("\\n") : "記録なし";
+      const body = wrapList.length > 0 ? wrapList.join("\n") : "記録なし";
       const blob = new Blob([header + body], { type: "text/plain" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -271,13 +283,18 @@
     });
 
     secondsLbl.addEventListener("click", () => {
-      isManuallyBlocked = !isManuallyBlocked;
-      if (isManuallyBlocked) {
+      if (!isManuallyBlocked) {
+        isManuallyBlocked = true;
+        pauseStartTime = new Date().getTime();
         if (timer) {
           clearInterval(timer);
           timer = null;
         }
       } else {
+        isManuallyBlocked = false;
+        if (pauseStartTime > 0) {
+          pausedDuration += new Date().getTime() - pauseStartTime;
+        }
         if (!timer && startTime !== 0) {
           timer = setInterval(countUp, 100);
         }
