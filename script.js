@@ -19,21 +19,18 @@ let passBackup = 0;
 let wrapBackup = 0;
 let wrapList = [];
 
+let isManuallyBlocked = false;
+let pauseStartTime = 0;
+let pausedDuration = 0;
+
 // ✅ ゼロ埋め関数
 const zeroPad = (num, digits) => String(num).padStart(digits, "0");
 
 // ✅ ブロック時間帯（24時間表記）
 const blockedTimeRanges = [
-  ["10:15", "10:25"],
-  ["12:15", "13:00"],
-  ["15:00", "15:10"],
-  ["17:10", "17:20"],
-  ["19:20", "19:30"],
-  ["22:15", "22:25"],
-  ["00:15", "01:00"],
-  ["03:00", "03:10"],
-  ["05:10", "05:20"],
-  ["07:20", "07:30"],
+  ["10:15", "10:25"], ["12:15", "13:00"], ["15:00", "15:10"],
+  ["17:10", "17:20"], ["19:20", "19:30"], ["22:15", "22:25"],
+  ["00:15", "01:00"], ["03:00", "03:10"], ["05:10", "05:20"], ["07:20", "07:30"]
 ];
 
 // ✅ 現在がブロック時間か？
@@ -41,12 +38,9 @@ const isBlockedTime = () => {
   const now = new Date();
   const current = `${zeroPad(now.getHours(), 2)}:${zeroPad(now.getMinutes(), 2)}`;
   return blockedTimeRanges.some(([start, end]) => {
-    if (start > end) {
-      return current >= start || current < end;
-    } else {
-      return current >= start && current < end;
-    }
-  });
+    if (start > end) return current >= start || current < end;
+    return current >= start && current < end;
+  }) || isManuallyBlocked;
 };
 
 // ✅ 現在時刻を更新 & 開始ボタンを有効に
@@ -57,7 +51,12 @@ const updateNowTime = () => {
   const s = zeroPad(now.getSeconds(), 2);
   nowTimeLbl.innerText = `${h}時${m}分${s}秒`;
 
-  // 停止中なら常にボタンを有効化
+  if (isBlockedTime() && timer) {
+    pauseStartTime = new Date().getTime();
+    clearInterval(timer);
+    timer = null;
+  }
+
   if (!timer) {
     startBtn.disabled = false;
   }
@@ -70,6 +69,7 @@ const setupTimer = () => {
   passTime = 0;
   passBackup = 0;
   wrapBackup = 0;
+  pausedDuration = 0;
   timerPar.style.color = "white";
   minutesLbl.innerText = zeroPad(0, 3);
   secondsLbl.innerText = zeroPad(0, 2);
@@ -80,7 +80,7 @@ const setupTimer = () => {
 // ✅ 経過時間取得
 const getPassTime = () => {
   const currentTime = new Date().getTime();
-  return passBackup + Math.floor((currentTime - startTime) / 1000);
+  return passBackup + Math.floor((currentTime - startTime - pausedDuration) / 1000);
 };
 
 // ✅ カウントアップ処理
@@ -95,22 +95,18 @@ const countUp = () => {
 
 // ✅ タイマー開始（ボタンが効かない問題を修正）
 const startTimer = () => {
-  if (timer) {
-    clearInterval(timer);
-    timer = null;
-  }
+  if (timer || isBlockedTime()) return;
 
   startBtn.disabled = true;
   resetBtn.disabled = false;
   wrapBtn.disabled = false;
-  startTime = new Date().getTime();
 
+  startTime = new Date().getTime();
   timer = setInterval(() => {
     if (isBlockedTime()) {
+      pauseStartTime = new Date().getTime();
       clearInterval(timer);
       timer = null;
-      wrapBtn.disabled = false;
-      startBtn.disabled = false;
       return;
     }
     countUp();
@@ -135,12 +131,12 @@ const resetTimer = () => {
 const addWrap = () => {
   if (!timer && !isBlockedTime()) {
     startTime = new Date().getTime();
+    pausedDuration = 0;
     timer = setInterval(() => {
       if (isBlockedTime()) {
+        pauseStartTime = new Date().getTime();
         clearInterval(timer);
         timer = null;
-        wrapBtn.disabled = false;
-        startBtn.disabled = false;
         return;
       }
       countUp();
@@ -169,9 +165,22 @@ window.addEventListener("load", () => {
   wrapBtn.addEventListener("click", addWrap);
 });
 
-console.log("✅ script.js 読み込まれました");
-
-startBtn.addEventListener("click", () => {
-  console.log("▶️ 開始ボタン押されました");
-  startTimer();
+// ✅ 秒クリックで手動ブロックON/OFF（内部加算も停止）
+secondsLbl.addEventListener("click", () => {
+  if (!isManuallyBlocked) {
+    isManuallyBlocked = true;
+    pauseStartTime = new Date().getTime();
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+  } else {
+    isManuallyBlocked = false;
+    pausedDuration += new Date().getTime() - pauseStartTime;
+    if (!timer && startTime !== 0) {
+      timer = setInterval(countUp, 100);
+    }
+  }
 });
+
+console.log("✅ 修正済み script.js 読み込まれました");
