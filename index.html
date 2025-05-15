@@ -5,44 +5,31 @@
   <title>ラップタイマー</title>
   <style>
     html, body {
-      height: 100%; margin: 0; padding: 0;
-      background-color: #263238; color: white;
-      font-family: sans-serif; overflow: hidden;
+      margin: 0; padding: 0;
+      height: 100%;
+      background-color: #263238;
+      color: white;
+      font-family: sans-serif;
+      overflow: hidden;
       display: flex; flex-direction: column; justify-content: space-between;
     }
     #title_area {
       font-size: 5vh;
       position: fixed;
-      top: 1vh;
-      left: 50%;
+      top: 1vh; left: 50%;
       transform: translateX(-50%);
       z-index: 20;
     }
     #now_time {
       font-size: 9vh;
       position: fixed;
-      top: 9vh;
-      left: 50%;
+      top: 9vh; left: 50%;
       transform: translateX(-50%);
       z-index: 10;
       padding: 0.5vh 2vw;
       border: 4px solid white;
       border-radius: 12px;
       background-color: rgba(255,255,255,0.1);
-    }
-    #hiddenImage {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-color: black;
-      z-index: 999;
-      display: none;
-      justify-content: center;
-      align-items: center;
-    }
-    #hiddenImage img {
-      max-width: 100%;
-      max-height: 100%;
     }
     #reset {
       position: fixed;
@@ -51,13 +38,21 @@
       font-size: 2.5vh;
       padding: 0.7vh 1.5vw;
       z-index: 10;
-      background-color: #aa3a5e;  /* 落ち着いたピンク系（視認性あり） */
+      background-color: #aa3a5e;
       color: #ccc;
       border: none;
     }
+    button:disabled {
+      background-color: #444 !important;
+      color: #999 !important;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
     section#main {
-      flex: 1; display: flex;
-      justify-content: flex-start; align-items: center;
+      flex: 1;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
       margin-top: 25vh;
       padding-left: 8vw;
     }
@@ -65,13 +60,17 @@
       font-size: 26vh;
     }
     .unit {
-      font-size: 8vh; margin: 0 1vw;
+      font-size: 8vh;
+      margin: 0 1vw;
     }
     section#controller {
-      display: flex; justify-content: center; align-items: center;
-      gap: 4vw; margin-bottom: 6vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 4vw;
+      margin-bottom: 6vh;
     }
-    #startButton, #reset, #wrap {
+    #startButton, #wrap {
       font-size: 2.4vh;
       padding: 1.2vh 2.4vw;
       border-radius: 8px;
@@ -105,15 +104,23 @@
       overflow-y: auto;
       font-size: 3vh;
     }
-    #wrapList { list-style: none; padding-left: 0; }
-    .wrap_item { margin-bottom: 1vh; white-space: nowrap; }
-    .over30 { color: red; font-weight: bold; }
+    #wrapList {
+      list-style: none;
+      padding-left: 0;
+    }
+    .wrap_item {
+      margin-bottom: 1vh;
+      white-space: nowrap;
+    }
+    .over30 {
+      color: red;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <p id="title_area"></p>
   <p id="now_time">--:--:--</p>
-  <div id="hiddenImage"><img src="https://placekitten.com/800/600" alt="隠し画像"></div>
 
   <section id="main">
     <p id="timer">
@@ -123,9 +130,9 @@
   </section>
 
   <section id="controller">
-    <button id="reset">作業終了(END)</button>
+    <button id="reset" disabled>作業終了(END)</button>
     <button id="startButton">開始</button>
-    <button id="wrap">ラップ</button>
+    <button id="wrap" disabled>ラップ</button>
   </section>
 
   <section id="wrapWrapper">
@@ -133,7 +140,6 @@
     <ol id="wrapList"></ol>
   </section>
   <script>
-    const titleArea = document.getElementById("title_area");
     const nowTimeLbl = document.getElementById("now_time");
     const minutesLbl = document.getElementById("minutes");
     const secondsLbl = document.getElementById("seconds");
@@ -141,20 +147,20 @@
     const resetBtn = document.getElementById("reset");
     const wrapBtn = document.getElementById("wrap");
     const wrapListDom = document.getElementById("wrapList");
-    const hiddenImage = document.getElementById("hiddenImage");
+    const titleArea = document.getElementById("title_area");
 
     let timer = null;
     let startTime = 0;
     let passTime = 0;
     let wrapList = [];
     let lastStartDate = null;
-
     let isManuallyBlocked = false;
     let pauseStartTime = 0;
     let pausedDuration = 0;
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const customTitle = urlParams.get("title") || "";
+    // タイトル表示
+    const params = new URLSearchParams(window.location.search);
+    const customTitle = params.get("title");
     if (customTitle) {
       titleArea.textContent = customTitle;
       document.title = customTitle;
@@ -181,10 +187,11 @@
       const now = new Date();
       nowTimeLbl.innerText = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}:${zeroPad(now.getSeconds(),2)}`;
       if (isBlockedTime() && timer) {
+        pauseStartTime = new Date().getTime();
         clearInterval(timer);
         timer = null;
-        pauseStartTime = new Date().getTime();
       }
+      if (!timer) startBtn.disabled = false;
     };
     setInterval(updateNowTime, 1000);
     updateNowTime();
@@ -197,6 +204,7 @@
       wrapList = [];
       wrapListDom.innerHTML = "";
       startTime = 0;
+      resetBtn.disabled = true;
     };
 
     const getPassTime = () => {
@@ -211,7 +219,7 @@
     };
 
     const startTimer = () => {
-      if (timer) return;
+      if (timer || isBlockedTime()) return;
       startTime = new Date().getTime();
       lastStartDate = new Date();
       timer = setInterval(countUp, 100);
@@ -220,7 +228,7 @@
     };
 
     const resetTimer = () => {
-      downloadMemo();
+      if (wrapList.length > 0) downloadMemo();
       clearInterval(timer);
       timer = null;
       setupTimer();
@@ -229,13 +237,14 @@
     };
 
     const addWrap = () => {
-      if (!timer) {
-        // 再始動処理（停止中でもOK）
+      if (!timer && !isBlockedTime()) {
         startTime = new Date().getTime();
         lastStartDate = new Date();
         pausedDuration = 0;
         timer = setInterval(countUp, 100);
       }
+
+      if (startTime === 0) return;
 
       isManuallyBlocked = false;
 
@@ -250,7 +259,6 @@
       li.className = "wrap_item";
       li.textContent = text;
       if (wrapTime >= 1800) li.classList.add("over30");
-
       wrapListDom.appendChild(li);
       wrapList.push(text);
 
@@ -258,14 +266,18 @@
       lastStartDate = now;
       pausedDuration = 0;
       passTime = 0;
+
+      // ✅ ラップがある時だけ終了ボタンを有効化
+      resetBtn.disabled = (wrapList.length === 0);
     };
 
     const downloadMemo = () => {
       const now = new Date();
       const dateStr = `${zeroPad(now.getFullYear(),4)}${zeroPad(now.getMonth()+1,2)}${zeroPad(now.getDate(),2)}_${zeroPad(now.getHours(),2)}${zeroPad(now.getMinutes(),2)}${zeroPad(now.getSeconds(),2)}`;
-      const fileName = `ラップタイム_${dateStr}.txt`;
-      const header = `【ラップタイム記録】\n\n`;
-      const body = wrapList.length > 0 ? wrapList.join("\n") : "記録なし";
+      const titleSafe = (customTitle || "記録").replace(/[^a-zA-Z0-9一-龯_]/g, "_");
+      const fileName = `${titleSafe}_ラップタイム_${dateStr}.txt`;
+      const header = `【${customTitle || "ラップタイム"} 記録】\n\n`;
+      const body = wrapList.join("\n");
       const blob = new Blob([header + body], { type: "text/plain" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -275,6 +287,7 @@
       URL.revokeObjectURL(url);
     };
 
+    // ✅ イベント登録
     window.addEventListener("load", () => {
       setupTimer();
       startBtn.addEventListener("click", startTimer);
@@ -282,6 +295,7 @@
       wrapBtn.addEventListener("click", addWrap);
     });
 
+    // ✅ 秒を押すと手動停止／再開
     secondsLbl.addEventListener("click", () => {
       if (!isManuallyBlocked) {
         isManuallyBlocked = true;
@@ -292,23 +306,11 @@
         }
       } else {
         isManuallyBlocked = false;
-        if (pauseStartTime > 0) {
-          pausedDuration += new Date().getTime() - pauseStartTime;
-        }
+        pausedDuration += new Date().getTime() - pauseStartTime;
         if (!timer && startTime !== 0) {
           timer = setInterval(countUp, 100);
         }
       }
-    });
-
-    let clickCount = 0;
-    nowTimeLbl.addEventListener("click", () => {
-      clickCount++;
-      if (clickCount >= 3) {
-        clickCount = 0;
-        hiddenImage.style.display = hiddenImage.style.display === "flex" ? "none" : "flex";
-      }
-      setTimeout(() => clickCount = 0, 1000);
     });
   </script>
 </body>
