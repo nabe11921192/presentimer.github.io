@@ -5,49 +5,25 @@
   <title>ラップタイマー</title>
   <style>
     html, body {
-      margin: 0; padding: 0;
-      height: 100%;
-      background-color: #263238;
-      color: white;
-      font-family: sans-serif;
-      overflow: hidden;
-      position: relative;
+      height: 100%; margin: 0; padding: 0;
+      background-color: #263238; color: white;
+      font-family: sans-serif; overflow: hidden;
+      display: flex; flex-direction: column; justify-content: space-between;
     }
-
-    #background {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-image: url('https://d.kuku.lu/u8vzwn5zt');
-      background-size: cover;
-      background-position: center;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    #secretTrigger {
-      position: fixed;
-      top: 1vh; left: 1vw;
-      width: 6vw; height: 6vh;
-      background: transparent;
-      border: none;
-      z-index: 100;
-    }
-
     #title_area {
       font-size: 5vh;
       position: fixed;
-      top: 1vh; left: 50%;
+      top: 1vh;
+      left: 50%;
       transform: translateX(-50%);
       z-index: 20;
+      text-align: center;
     }
-
     #now_time {
       font-size: 9vh;
       position: fixed;
-      top: 9vh; left: 50%;
+      top: 9vh;
+      left: 50%;
       transform: translateX(-50%);
       z-index: 10;
       padding: 0.5vh 2vw;
@@ -55,57 +31,51 @@
       border-radius: 12px;
       background-color: rgba(255,255,255,0.1);
     }
-
-    #resetButton {
+    #reset {
       position: fixed;
-      top: 1vh; right: 1vw;
-      width: 3vw; height: 5vh;
-      background-color: #1c252b;
-      border: none;
-      opacity: 0.7;
-      z-index: 30;
+      bottom: 10vh;
+      left: 2vw;
+      font-size: 2.5vh;
+      padding: 0.7vh 1.5vw;
+      z-index: 10;
+      background-color: #e91e63;
+      color: white;
     }
-
-    #resetButton:hover {
-      opacity: 0.95;
-      cursor: pointer;
+    #resetHidden {
+      position: fixed;
+      top: 2vh;
+      right: 2vw;
+      width: 10vw;
+      height: 5vh;
+      background: transparent;
+      border: none;
+      z-index: 11;
     }
     section#main {
-      flex: 1;
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
+      flex: 1; display: flex;
+      justify-content: flex-start; align-items: center;
       margin-top: 25vh;
       padding-left: 8vw;
     }
-
     #minutes, #seconds {
       font-size: 26vh;
     }
-
     .unit {
-      font-size: 8vh;
-      margin: 0 1vw;
+      font-size: 8vh; margin: 0 1vw;
     }
-
     section#controller {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 4vw;
-      margin-bottom: 6vh;
+      display: flex; justify-content: center; align-items: center;
+      gap: 4vw; margin-bottom: 6vh;
     }
-
-    button {
+    #startButton, #reset, #wrap {
       font-size: 2.4vh;
       padding: 1.2vh 2.4vw;
       border-radius: 8px;
       border: none;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      transition: all 0.2s ease;
+      transition: background-color 0.2s, transform 0.1s, filter 0.2s;
       cursor: pointer;
     }
-
     #wrap {
       font-size: 3.1vh;
       padding: 6vh 7.2vw;
@@ -115,26 +85,20 @@
       font-weight: bold;
       border: 2px solid #fdd835;
     }
-
     #startButton {
       background-color: #fafafa;
       color: #263238;
     }
-
-    #endButton {
-      background-color: #e91e63;
-      color: white;
-      position: absolute;
-      left: 2vw;
+    #startButton:hover, #reset:hover, #wrap:hover {
+      transform: scale(1.05);
+      filter: brightness(1.1);
     }
-
-    button:disabled {
-      background-color: #444 !important;
-      color: #999 !important;
-      cursor: not-allowed;
+    #startButton:disabled, #wrap:disabled, #reset:disabled {
+      background-color: #aaa !important;
+      color: #444 !important;
+      cursor: not-allowed !important;
       opacity: 0.6;
     }
-
     section#wrapWrapper {
       position: fixed;
       top: 20vh;
@@ -142,107 +106,98 @@
       max-height: 75vh;
       overflow-y: auto;
       font-size: 3vh;
-      z-index: 10;
     }
-
-    #wrapList {
-      list-style: none;
-      padding-left: 0;
-    }
-
-    .wrap_item {
-      margin-bottom: 1vh;
-      white-space: nowrap;
-    }
-
-    .over30 {
-      color: red;
-      font-weight: bold;
-    }
+    #wrapList { list-style: none; padding-left: 0; }
+    .wrap_item { margin-bottom: 1vh; white-space: nowrap; }
+    .over30 { color: red; font-weight: bold; }
   </style>
 </head>
 <body>
-  <div id="background"></div>
-  <button id="secretTrigger" aria-label="secret background toggle"></button>
-  <p id="title_area"></p>
+  <p id="title_area">タイトルを入力</p>
   <p id="now_time">--:--:--</p>
-  <button id="resetButton" aria-label="reset"></button>
-
+  <button id="resetHidden" aria-label="hidden reset"></button>
   <section id="main">
     <p id="timer">
       <span id="minutes">000</span><span class="unit">分</span>
       <span id="seconds">00</span><span class="unit">秒</span>
     </p>
   </section>
-
   <section id="controller">
-    <button id="endButton" disabled>作業終了(END)</button>
+    <button id="reset">作業終了(END)</button>
     <button id="startButton">開始</button>
-    <button id="wrap" disabled>ラップ</button>
+    <button id="wrap">ラップ</button>
   </section>
-
   <section id="wrapWrapper">
     <h1>ラップタイム</h1>
     <ol id="wrapList"></ol>
   </section>
-
   <script>
-    const background = document.getElementById("background");
-    const trigger = document.getElementById("secretTrigger");
-
-    let tapCount = 0;
-    let tapTimer = null;
-    let isImageVisible = false;
-
-    trigger.addEventListener("click", () => {
-      tapCount++;
-      if (tapTimer) clearTimeout(tapTimer);
-      tapTimer = setTimeout(() => {
-        if (tapCount >= 3) {
-          isImageVisible = !isImageVisible;
-          background.style.opacity = isImageVisible ? "1" : "0";
-        }
-        tapCount = 0;
-      }, 500);
-    });
-
+    const timerPar = document.getElementById("timer");
     const minutesLbl = document.getElementById("minutes");
     const secondsLbl = document.getElementById("seconds");
+    const nowTimeLbl = document.getElementById("now_time");
     const startBtn = document.getElementById("startButton");
-    const resetBtn = document.getElementById("resetButton");
-    const endBtn = document.getElementById("endButton");
+    const resetBtn = document.getElementById("reset");
     const wrapBtn = document.getElementById("wrap");
     const wrapListDom = document.getElementById("wrapList");
-    const nowTimeLbl = document.getElementById("now_time");
-    const titleArea = document.getElementById("title_area");
 
-    // 次はパート④（JS本体とロジック）へ続きます
     let timer = null;
     let startTime = 0;
     let passTime = 0;
+    let passBackup = 0;
+    let wrapBackup = 0;
     let wrapList = [];
-    let lastStartDate = null;
     let isManuallyBlocked = false;
     let pauseStartTime = 0;
     let pausedDuration = 0;
 
-    const params = new URLSearchParams(window.location.search);
-    const customTitle = params.get("title");
-    if (customTitle) {
-      titleArea.textContent = customTitle;
-      document.title = customTitle;
-    }
-
     const zeroPad = (num, digits) => String(num).padStart(digits, "0");
 
-    const isBlockedTime = () => isManuallyBlocked;
+    const blockedTimeRanges = [
+      ["10:15", "10:25"], ["12:15", "13:00"], ["15:00", "15:10"],
+      ["17:10", "17:20"], ["19:20", "19:30"], ["22:15", "22:25"],
+      ["00:15", "01:00"], ["03:00", "03:10"], ["05:10", "05:20"], ["07:20", "07:30"]
+    ];
+
+    const isBlockedTime = () => {
+      const now = new Date();
+      const current = `${zeroPad(now.getHours(), 2)}:${zeroPad(now.getMinutes(), 2)}`;
+      return blockedTimeRanges.some(([start, end]) => {
+        if (start > end) return current >= start || current < end;
+        return current >= start && current < end;
+      }) || isManuallyBlocked;
+    };
+
+    const updateNowTime = () => {
+      const now = new Date();
+      nowTimeLbl.innerText = `${zeroPad(now.getHours(),2)}時${zeroPad(now.getMinutes(),2)}分${zeroPad(now.getSeconds(),2)}秒`;
+
+      if (isBlockedTime() && timer) {
+        pauseStartTime = new Date().getTime();
+        clearInterval(timer);
+        timer = null;
+      }
+
+      if (!timer) {
+        startBtn.disabled = false;
+      }
+    };
+    setInterval(updateNowTime, 1000);
+    updateNowTime();
+
+    const setupTimer = () => {
+      passTime = 0;
+      passBackup = 0;
+      wrapBackup = 0;
+      pausedDuration = 0;
+      timerPar.style.color = "white";
+      minutesLbl.innerText = zeroPad(0, 3);
+      secondsLbl.innerText = zeroPad(0, 2);
+    };
 
     const getPassTime = () => {
-      const now = new Date().getTime();
-      if (pauseStartTime && isManuallyBlocked) {
-        return Math.floor((pauseStartTime - startTime - pausedDuration) / 1000);
-      }
-      return Math.floor((now - startTime - pausedDuration) / 1000);
+      const currentTime = new Date().getTime();
+      return passBackup + Math.floor((currentTime - startTime - pausedDuration) / 1000);
     };
 
     const countUp = () => {
@@ -251,106 +206,69 @@
       secondsLbl.innerText = zeroPad(passTime % 60, 2);
     };
 
-    const updateNowTime = () => {
-      const now = new Date();
-      nowTimeLbl.innerText = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}:${zeroPad(now.getSeconds(),2)}`;
-      if (isBlockedTime() && timer) {
-        pauseStartTime = new Date().getTime();
-        clearInterval(timer);
-        timer = null;
-      }
-      startBtn.disabled = !(startTime === 0);
-    };
-    setInterval(updateNowTime, 1000);
-    updateNowTime();
-
-    const setupTimer = () => {
-      passTime = 0;
-      pausedDuration = 0;
-      pauseStartTime = 0;
-      isManuallyBlocked = false;
-      minutesLbl.innerText = zeroPad(0, 3);
-      secondsLbl.innerText = zeroPad(0, 2);
-      wrapList = [];
-      wrapListDom.innerHTML = "";
-      startTime = 0;
-      endBtn.disabled = true;
-      wrapBtn.disabled = true;
-    };
-
     const startTimer = () => {
-      if (timer || startTime !== 0 || isBlockedTime()) return;
-      startTime = new Date().getTime();
-      lastStartDate = new Date();
-      timer = setInterval(countUp, 100);
+      if (timer || isBlockedTime()) return;
       startBtn.disabled = true;
+      resetBtn.disabled = false;
       wrapBtn.disabled = false;
+      startTime = new Date().getTime();
+      timer = setInterval(() => {
+        if (isBlockedTime()) {
+          pauseStartTime = new Date().getTime();
+          clearInterval(timer);
+          timer = null;
+          return;
+        }
+        countUp();
+      }, 100);
     };
 
-    const resetTimerOnly = () => {
+    const resetTimer = () => {
       clearInterval(timer);
       timer = null;
       setupTimer();
       startBtn.disabled = false;
-    };
-
-    const resetTimerAndDownload = () => {
-      if (wrapList.length > 0) downloadMemo();
-      resetTimerOnly();
-    };
-
-    const addWrap = () => {
-      const now = new Date();
-      const wrapTime = getPassTime();
-      const startStr = `${zeroPad(lastStartDate?.getHours() || now.getHours(),2)}:${zeroPad(lastStartDate?.getMinutes() || now.getMinutes(),2)}`;
-      const endStr = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
-      const wrapStr = `${zeroPad(Math.floor(wrapTime / 60),2)}分${zeroPad(wrapTime % 60,2)}秒`;
-      const text = `${wrapList.length+1}回目 ${startStr}～${endStr}　${wrapStr}`;
-      const li = document.createElement("li");
-      li.className = "wrap_item";
-      li.textContent = text;
-      if (wrapTime >= 1800) li.classList.add("over30");
-      wrapListDom.appendChild(li);
-      wrapList.push(text);
-      endBtn.disabled = false;
-
-      if (!timer && isManuallyBlocked) {
-        pausedDuration += new Date().getTime() - pauseStartTime;
-        isManuallyBlocked = false;
-        startTime = new Date().getTime();
-        lastStartDate = new Date();
-        pausedDuration = 0;
-        passTime = 0;
-        timer = setInterval(countUp, 100);
-      } else if (timer) {
-        startTime = now.getTime();
-        lastStartDate = now;
-        pausedDuration = 0;
-        passTime = 0;
+      resetBtn.disabled = false;
+      wrapBtn.disabled = true;
+      wrapList = [];
+      while (wrapListDom.firstChild) {
+        wrapListDom.removeChild(wrapListDom.firstChild);
       }
     };
 
-    const downloadMemo = () => {
-      const now = new Date();
-      const dateStr = `${zeroPad(now.getFullYear(),4)}${zeroPad(now.getMonth()+1,2)}${zeroPad(now.getDate(),2)}_${zeroPad(now.getHours(),2)}${zeroPad(now.getMinutes(),2)}${zeroPad(now.getSeconds(),2)}`;
-      const titleSafe = (customTitle || "記録").replace(/[^a-zA-Z0-9一-龯_]/g, "_");
-      const fileName = `${titleSafe}_ラップタイム_${dateStr}.txt`;
-      const header = `【${customTitle || "ラップタイム"} 記録】\n\n`;
-      const body = wrapList.join("\n");
-      const blob = new Blob([header + body], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName;
-      a.click();
-      URL.revokeObjectURL(url);
+    const addWrap = () => {
+      if (!timer && !isBlockedTime()) {
+        startTime = new Date().getTime();
+        pausedDuration = 0;
+        timer = setInterval(() => {
+          if (isBlockedTime()) {
+            pauseStartTime = new Date().getTime();
+            clearInterval(timer);
+            timer = null;
+            return;
+          }
+          countUp();
+        }, 100);
+      }
+
+      const wrapTime = passTime - wrapBackup;
+      wrapBackup = passTime;
+      const wrapMinute = zeroPad(Math.floor(wrapTime / 60), 2);
+      const wrapSecond = zeroPad(wrapTime % 60, 2);
+      const wrapIndex = wrapList.length + 1;
+      const text = `${wrapIndex}回目 ${wrapMinute}分${wrapSecond}秒`;
+      const li = document.createElement("li");
+      li.className = "wrap_item";
+      li.textContent = text;
+      wrapListDom.appendChild(li);
+      wrapList.push(text);
+      passBackup = passTime;
     };
 
     window.addEventListener("load", () => {
       setupTimer();
       startBtn.addEventListener("click", startTimer);
-      resetBtn.addEventListener("click", resetTimerOnly);
-      endBtn.addEventListener("click", resetTimerAndDownload);
+      resetBtn.addEventListener("click", resetTimer);
       wrapBtn.addEventListener("click", addWrap);
     });
 
@@ -369,6 +287,36 @@
           timer = setInterval(countUp, 100);
         }
       }
+    });
+
+    // ✅ タイトル編集機能
+    const titleArea = document.getElementById("title_area");
+    titleArea.addEventListener("click", () => {
+      if (titleArea.querySelector("input")) return;
+
+      const currentText = titleArea.textContent.trim();
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = currentText || "無題";
+      input.style.fontSize = "5vh";
+      input.style.background = "transparent";
+      input.style.border = "none";
+      input.style.color = "white";
+      input.style.textAlign = "center";
+      input.style.width = "80vw";
+
+      titleArea.textContent = "";
+      titleArea.appendChild(input);
+      input.focus();
+
+      const finalize = () => {
+        titleArea.textContent = input.value.trim() || "無題";
+      };
+
+      input.addEventListener("blur", finalize);
+      input.addEventListener("keydown", e => {
+        if (e.key === "Enter") input.blur();
+      });
     });
   </script>
 </body>
