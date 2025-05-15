@@ -19,6 +19,7 @@
       top: 1vh; left: 50%;
       transform: translateX(-50%);
       z-index: 20;
+      cursor: pointer;
     }
     #now_time {
       font-size: 9vh;
@@ -165,11 +166,24 @@
     let pausedDuration = 0;
 
     const params = new URLSearchParams(window.location.search);
-    const customTitle = params.get("title");
+    let customTitle = params.get("title");
     if (customTitle) {
       titleArea.textContent = customTitle;
       document.title = customTitle;
     }
+
+    titleArea.addEventListener("click", () => {
+      const newTitle = prompt("新しいタイトルを入力してください：", titleArea.textContent);
+      if (newTitle && newTitle.trim() !== "") {
+        customTitle = newTitle;
+        titleArea.textContent = customTitle;
+        document.title = customTitle;
+        const newParams = new URLSearchParams(window.location.search);
+        newParams.set("title", customTitle);
+        const newUrl = `${window.location.pathname}?${newParams.toString()}`;
+        window.history.replaceState(null, "", newUrl);
+      }
+    });
 
     const zeroPad = (num, digits) => String(num).padStart(digits, "0");
 
@@ -216,6 +230,7 @@
     };
     setInterval(updateNowTime, 1000);
     updateNowTime();
+
     const setupTimer = () => {
       passTime = 0;
       pausedDuration = 0;
