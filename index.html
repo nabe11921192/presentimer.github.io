@@ -186,12 +186,15 @@
     const updateNowTime = () => {
       const now = new Date();
       nowTimeLbl.innerText = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}:${zeroPad(now.getSeconds(),2)}`;
+
       if (isBlockedTime() && timer) {
         pauseStartTime = new Date().getTime();
         clearInterval(timer);
         timer = null;
       }
-      if (!timer) startBtn.disabled = true; // 停止中は常に無効
+
+      // ✅ 修正：未開始かつブロック中以外のときだけ開始ボタンを有効化
+      startBtn.disabled = !(startTime === 0 && !isBlockedTime());
     };
     setInterval(updateNowTime, 1000);
     updateNowTime();
@@ -232,13 +235,11 @@
       clearInterval(timer);
       timer = null;
       setupTimer();
-      startBtn.disabled = false;
       wrapBtn.disabled = true;
     };
 
     const addWrap = () => {
       const now = new Date();
-
       const wrapTime = getPassTime();
       const startStr = `${zeroPad(lastStartDate?.getHours() || now.getHours(),2)}:${zeroPad(lastStartDate?.getMinutes() || now.getMinutes(),2)}`;
       const endStr = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
