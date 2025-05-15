@@ -30,18 +30,19 @@
       border-radius: 12px;
       background-color: rgba(255,255,255,0.1);
     }
-    #secretImage {
-      display: none;
+    #hiddenImage {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background-color: black;
-      background-image: url('https://placekitten.com/800/600');
-      background-size: cover;
-      background-position: center;
       z-index: 999;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+    #hiddenImage img {
+      max-width: 100%;
+      max-height: 100%;
     }
     #reset {
       position: fixed;
@@ -52,16 +53,6 @@
       z-index: 10;
       background-color: #e91e63;
       color: white;
-    }
-    #resetHidden {
-      position: fixed;
-      top: 2vh;
-      right: 2vw;
-      width: 10vw;
-      height: 5vh;
-      background: transparent;
-      border: none;
-      z-index: 11;
     }
     section#main {
       flex: 1; display: flex;
@@ -121,23 +112,26 @@
 <body>
   <p id="title_area"></p>
   <p id="now_time">--:--:--</p>
-  <div id="secretImage"></div>
-  <button id="resetHidden" aria-label="hidden reset"></button>
+  <div id="hiddenImage"><img src="https://placekitten.com/800/600" alt="隠し画像"></div>
+
   <section id="main">
     <p id="timer">
       <span id="minutes">000</span><span class="unit">分</span>
       <span id="seconds">00</span><span class="unit">秒</span>
     </p>
   </section>
+
   <section id="controller">
     <button id="reset">作業終了(END)</button>
     <button id="startButton">開始</button>
     <button id="wrap">ラップ</button>
   </section>
+
   <section id="wrapWrapper">
     <h1>ラップタイム</h1>
     <ol id="wrapList"></ol>
   </section>
+
   <script>
     const titleArea = document.getElementById("title_area");
     const nowTimeLbl = document.getElementById("now_time");
@@ -147,8 +141,7 @@
     const resetBtn = document.getElementById("reset");
     const wrapBtn = document.getElementById("wrap");
     const wrapListDom = document.getElementById("wrapList");
-    const hiddenResetBtn = document.getElementById("resetHidden");
-    const secretImage = document.getElementById("secretImage");
+    const hiddenImage = document.getElementById("hiddenImage");
 
     let timer = null;
     let startTime = 0;
@@ -157,14 +150,10 @@
     let lastStartDate = null;
     let isPausedByBlock = false;
     let isManuallyBlocked = false;
-    let tapCount = 0;
-    let tapTimer = null;
 
     const urlParams = new URLSearchParams(window.location.search);
     const customTitle = urlParams.get("title") || "";
-    if (customTitle) {
-      titleArea.innerText = customTitle;
-    }
+    if (customTitle) titleArea.innerText = customTitle;
 
     const zeroPad = (num, digits) => String(num).padStart(digits, "0");
 
@@ -177,26 +166,11 @@
     const isBlockedTime = () => {
       const now = new Date();
       const current = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
-      const timeBlocked = blockedTimeRanges.some(([start, end]) => {
+      return blockedTimeRanges.some(([start, end]) => {
         if (start > end) return current >= start || current < end;
         return current >= start && current < end;
-      });
-      return timeBlocked || isManuallyBlocked;
+      }) || isManuallyBlocked;
     };
-
-    secondsLbl.addEventListener("click", () => {
-      isManuallyBlocked = !isManuallyBlocked;
-    });
-
-    nowTimeLbl.addEventListener("click", () => {
-      tapCount++;
-      if (tapTimer) clearTimeout(tapTimer);
-      tapTimer = setTimeout(() => { tapCount = 0; }, 1000);
-      if (tapCount === 3) {
-        secretImage.style.display = secretImage.style.display === 'block' ? 'none' : 'block';
-        tapCount = 0;
-      }
-    });
 
     const updateNowTime = () => {
       const now = new Date();
@@ -209,10 +183,6 @@
           isPausedByBlock = true;
         }
       }
-
-      startBtn.disabled = false;
-      wrapBtn.disabled = false;
-      resetBtn.disabled = false;
     };
     setInterval(updateNowTime, 1000);
     updateNowTime();
@@ -221,6 +191,8 @@
       passTime = 0;
       minutesLbl.innerText = zeroPad(0, 3);
       secondsLbl.innerText = zeroPad(0, 2);
+      wrapList = [];
+      wrapListDom.innerHTML = "";
     };
 
     const getPassTime = () => Math.floor((new Date().getTime() - startTime) / 1000);
@@ -244,21 +216,16 @@
     const resetTimer = () => {
       clearInterval(timer);
       timer = null;
-      downloadMemo();
       setupTimer();
       startBtn.disabled = false;
-      wrapBtn.disabled = false;
-      wrapList = [];
-      wrapListDom.innerHTML = "";
+      wrapBtn.disabled = true;
+      downloadMemo();
     };
 
     const addWrap = () => {
-      if (!timer) {
-        isManuallyBlocked = false;
-        startTime = new Date().getTime() - passTime * 1000;
-        timer = setInterval(countUp, 100);
-        isPausedByBlock = false;
-      }
+      if (!timer) return;
+      isManuallyBlocked = false;
+
       const now = new Date();
       const wrapTime = Math.floor((now.getTime() - startTime) / 1000);
       const startStr = `${zeroPad(lastStartDate.getHours(),2)}:${zeroPad(lastStartDate.getMinutes(),2)}`;
@@ -270,6 +237,7 @@
       li.className = "wrap_item";
       li.textContent = text;
       if (wrapTime >= 1800) li.classList.add("over30");
+
       wrapListDom.appendChild(li);
       wrapList.push(text);
 
@@ -295,12 +263,33 @@
       URL.revokeObjectURL(url);
     };
 
+    // イベント登録
     window.addEventListener("load", () => {
       setupTimer();
       startBtn.addEventListener("click", startTimer);
       resetBtn.addEventListener("click", resetTimer);
       wrapBtn.addEventListener("click", addWrap);
-      hiddenResetBtn.addEventListener("click", setupTimer);
+    });
+
+    // 秒クリックで強制ブロック切り替え
+    secondsLbl.addEventListener("click", () => {
+      isManuallyBlocked = !isManuallyBlocked;
+      if (isManuallyBlocked && timer) {
+        clearInterval(timer);
+        timer = null;
+        isPausedByBlock = true;
+      }
+    });
+
+    // 隠し画像の表示：時計3回クリックで切替
+    let clickCount = 0;
+    nowTimeLbl.addEventListener("click", () => {
+      clickCount++;
+      if (clickCount >= 3) {
+        clickCount = 0;
+        hiddenImage.style.display = hiddenImage.style.display === "flex" ? "none" : "flex";
+      }
+      setTimeout(() => clickCount = 0, 1000);
     });
   </script>
 </body>
