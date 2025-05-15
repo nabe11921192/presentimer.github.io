@@ -31,6 +31,19 @@
       border-radius: 12px;
       background-color: rgba(255,255,255,0.1);
     }
+    #resetButton {
+      position: fixed;
+      top: 1vh; left: 1vw;
+      width: 3vw; height: 5vh;
+      background-color: #1c252b;
+      border: none;
+      opacity: 0.7;
+      z-index: 5;
+    }
+    #resetButton:hover {
+      opacity: 0.95;
+      cursor: pointer;
+    }
     section#main {
       flex: 1;
       display: flex;
@@ -75,24 +88,11 @@
       background-color: #fafafa;
       color: #263238;
     }
-    #resetButton {
-      position: fixed;
-      top: 1vh;
-      left: 1vw;
-      width: 3vw;
-      height: 5vh;
-      background-color: #1c252b;
-      border: none;
-      opacity: 0.7;
-      z-index: 5;
-    }
-    #resetButton:hover {
-      opacity: 0.95;
-      cursor: pointer;
-    }
     #endButton {
       background-color: #e91e63;
       color: white;
+      position: absolute;
+      left: 2vw;
     }
     button:disabled {
       background-color: #444 !important;
@@ -125,6 +125,7 @@
 <body>
   <p id="title_area"></p>
   <p id="now_time">--:--:--</p>
+  <button id="resetButton" aria-label="reset"></button>
 
   <section id="main">
     <p id="timer">
@@ -138,7 +139,6 @@
     <button id="startButton">開始</button>
     <button id="wrap" disabled>ラップ</button>
   </section>
-  <button id="resetButton" aria-label="reset"></button>
 
   <section id="wrapWrapper">
     <h1>ラップタイム</h1>
@@ -206,19 +206,17 @@
     const updateNowTime = () => {
       const now = new Date();
       nowTimeLbl.innerText = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}:${zeroPad(now.getSeconds(),2)}`;
-
       if (isBlockedTime() && timer) {
         pauseStartTime = new Date().getTime();
         clearInterval(timer);
         timer = null;
       }
 
-      // ✅ 開始ボタンは「未開始」のときだけ有効
-      startBtn.disabled = !(startTime === 0 && !isBlockedTime());
+      // ✅ 開始ボタンは「startTime === 0」で未開始状態なら常に有効
+      startBtn.disabled = !(startTime === 0);
     };
     setInterval(updateNowTime, 1000);
     updateNowTime();
-
     const setupTimer = () => {
       passTime = 0;
       pausedDuration = 0;
@@ -231,9 +229,7 @@
     };
 
     const startTimer = () => {
-      if (timer || startTime !== 0) return;
-      if (isBlockedTime()) return;
-
+      if (timer || startTime !== 0 || isBlockedTime()) return;
       startTime = new Date().getTime();
       lastStartDate = new Date();
       timer = setInterval(countUp, 100);
@@ -268,9 +264,9 @@
       if (wrapTime >= 1800) li.classList.add("over30");
       wrapListDom.appendChild(li);
       wrapList.push(text);
+      endBtn.disabled = false;
 
-      endBtn.disabled = (wrapList.length === 0);
-
+      // 再スタート処理
       if (!timer && (isManuallyBlocked || isBlockedTime())) {
         if (isManuallyBlocked) {
           pausedDuration += new Date().getTime() - pauseStartTime;
