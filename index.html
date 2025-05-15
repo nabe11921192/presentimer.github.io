@@ -50,7 +50,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 2vw;
+      gap: 4vw;
       margin-bottom: 6vh;
     }
     button {
@@ -76,8 +76,19 @@
       color: #263238;
     }
     #resetButton {
-      background-color: #607d8b;
-      color: white;
+      position: fixed;
+      top: 1vh;
+      left: 1vw;
+      width: 3vw;
+      height: 5vh;
+      background-color: #1c252b;
+      border: none;
+      opacity: 0.7;
+      z-index: 5;
+    }
+    #resetButton:hover {
+      opacity: 0.95;
+      cursor: pointer;
     }
     #endButton {
       background-color: #e91e63;
@@ -124,10 +135,10 @@
 
   <section id="controller">
     <button id="endButton" disabled>作業終了(END)</button>
-    <button id="resetButton">リセット</button>
     <button id="startButton">開始</button>
     <button id="wrap" disabled>ラップ</button>
   </section>
+  <button id="resetButton" aria-label="reset"></button>
 
   <section id="wrapWrapper">
     <h1>ラップタイム</h1>
@@ -202,10 +213,8 @@
         timer = null;
       }
 
-      startBtn.disabled = !(
-        (startTime === 0 && !isBlockedTime()) ||
-        (isManuallyBlocked && startTime !== 0)
-      );
+      // ✅ 開始ボタンは「未開始」のときだけ有効
+      startBtn.disabled = !(startTime === 0 && !isBlockedTime());
     };
     setInterval(updateNowTime, 1000);
     updateNowTime();
@@ -222,12 +231,8 @@
     };
 
     const startTimer = () => {
-      if (timer || (isBlockedTime() && !isManuallyBlocked)) return;
-
-      if (isManuallyBlocked) {
-        pausedDuration += new Date().getTime() - pauseStartTime;
-        isManuallyBlocked = false;
-      }
+      if (timer || startTime !== 0) return;
+      if (isBlockedTime()) return;
 
       startTime = new Date().getTime();
       lastStartDate = new Date();
