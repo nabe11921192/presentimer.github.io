@@ -27,6 +27,15 @@
       pointer-events: none;
     }
 
+    #secretTrigger {
+      position: fixed;
+      top: 1vh; left: 1vw;
+      width: 6vw; height: 6vh;
+      background: transparent;
+      border: none;
+      z-index: 100;
+    }
+
     #title_area {
       font-size: 5vh;
       position: fixed;
@@ -45,7 +54,6 @@
       border: 4px solid white;
       border-radius: 12px;
       background-color: rgba(255,255,255,0.1);
-      cursor: pointer;
     }
 
     #resetButton {
@@ -155,6 +163,7 @@
 </head>
 <body>
   <div id="background"></div>
+  <button id="secretTrigger" aria-label="secret background toggle"></button>
   <p id="title_area"></p>
   <p id="now_time">--:--:--</p>
   <button id="resetButton" aria-label="reset"></button>
@@ -179,13 +188,13 @@
 
   <script>
     const background = document.getElementById("background");
-    const nowTimeLbl = document.getElementById("now_time");
+    const trigger = document.getElementById("secretTrigger");
 
     let tapCount = 0;
     let tapTimer = null;
     let isImageVisible = false;
 
-    nowTimeLbl.addEventListener("click", () => {
+    trigger.addEventListener("click", () => {
       tapCount++;
       if (tapTimer) clearTimeout(tapTimer);
       tapTimer = setTimeout(() => {
@@ -197,7 +206,6 @@
       }, 500);
     });
 
-    // ✅ このあと通常のタイマー処理や要素取得などが続きます
     const minutesLbl = document.getElementById("minutes");
     const secondsLbl = document.getElementById("seconds");
     const startBtn = document.getElementById("startButton");
@@ -205,8 +213,10 @@
     const endBtn = document.getElementById("endButton");
     const wrapBtn = document.getElementById("wrap");
     const wrapListDom = document.getElementById("wrapList");
+    const nowTimeLbl = document.getElementById("now_time");
     const titleArea = document.getElementById("title_area");
 
+    // 次はパート④（JS本体とロジック）へ続きます
     let timer = null;
     let startTime = 0;
     let passTime = 0;
