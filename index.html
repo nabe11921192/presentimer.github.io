@@ -169,7 +169,6 @@
 
     secondsLbl.addEventListener("click", () => {
       isManuallyBlocked = !isManuallyBlocked;
-      alert(isManuallyBlocked ? "強制ブロック中（タイマー停止）" : "強制ブロック解除（タイマー再開）");
     });
 
     const updateNowTime = () => {
@@ -184,7 +183,6 @@
         }
       }
 
-      // ✅ 常に有効
       startBtn.disabled = false;
       wrapBtn.disabled = false;
       resetBtn.disabled = false;
@@ -229,6 +227,7 @@
 
     const addWrap = () => {
       if (!timer) {
+        isManuallyBlocked = false; // 強制ブロック解除
         startTime = new Date().getTime() - passTime * 1000;
         timer = setInterval(countUp, 100);
         isPausedByBlock = false;
