@@ -10,14 +10,6 @@
       font-family: sans-serif; overflow: hidden;
       display: flex; flex-direction: column; justify-content: space-between;
     }
-    #title_area {
-      font-size: 5vh;
-      position: fixed;
-      top: 1vh;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 20;
-    }
     #now_time {
       font-size: 9vh;
       position: fixed;
@@ -110,7 +102,6 @@
   </style>
 </head>
 <body>
-  <p id="title_area"></p>
   <p id="now_time">--:--:--</p>
   <div id="hiddenImage"><img src="https://placekitten.com/800/600" alt="隠し画像"></div>
 
@@ -131,9 +122,7 @@
     <h1>ラップタイム</h1>
     <ol id="wrapList"></ol>
   </section>
-
   <script>
-    const titleArea = document.getElementById("title_area");
     const nowTimeLbl = document.getElementById("now_time");
     const minutesLbl = document.getElementById("minutes");
     const secondsLbl = document.getElementById("seconds");
@@ -150,10 +139,6 @@
     let lastStartDate = null;
     let isPausedByBlock = false;
     let isManuallyBlocked = false;
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const customTitle = urlParams.get("title") || "";
-    if (customTitle) titleArea.innerText = customTitle;
 
     const zeroPad = (num, digits) => String(num).padStart(digits, "0");
 
@@ -175,7 +160,6 @@
     const updateNowTime = () => {
       const now = new Date();
       nowTimeLbl.innerText = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}:${zeroPad(now.getSeconds(),2)}`;
-
       if (isBlockedTime()) {
         if (timer) {
           clearInterval(timer);
@@ -205,25 +189,30 @@
 
     const startTimer = () => {
       if (timer) return;
-      startBtn.disabled = true;
-      wrapBtn.disabled = false;
       startTime = new Date().getTime();
       lastStartDate = new Date();
       timer = setInterval(countUp, 100);
+      startBtn.disabled = true;
+      wrapBtn.disabled = false;
       isPausedByBlock = false;
     };
 
     const resetTimer = () => {
+      downloadMemo(); // ラップが0件でも保存
       clearInterval(timer);
       timer = null;
       setupTimer();
       startBtn.disabled = false;
       wrapBtn.disabled = true;
-      downloadMemo();
     };
 
     const addWrap = () => {
-      if (!timer) return;
+      if (!timer) {
+        // 停止中でも再始動
+        startTime = new Date().getTime() - passTime * 1000;
+        timer = setInterval(countUp, 100);
+        lastStartDate = new Date();
+      }
       isManuallyBlocked = false;
 
       const now = new Date();
@@ -247,13 +236,11 @@
     };
 
     const downloadMemo = () => {
-      if (wrapList.length === 0) return;
       const now = new Date();
       const dateStr = `${zeroPad(now.getFullYear(),4)}${zeroPad(now.getMonth()+1,2)}${zeroPad(now.getDate(),2)}_${zeroPad(now.getHours(),2)}${zeroPad(now.getMinutes(),2)}${zeroPad(now.getSeconds(),2)}`;
-      const titleSafe = customTitle.replace(/[^a-zA-Z0-9一-龯_]/g, '_');
-      const fileName = `${titleSafe}_ラップタイム_${dateStr}.txt`;
-      const header = `【${customTitle || "作業者"} ラップタイム記録】\n\n`;
-      const body = wrapList.join("\n");
+      const fileName = `ラップタイム_${dateStr}.txt`;
+      const header = `【ラップタイム記録】\n\n`;
+      const body = wrapList.length > 0 ? wrapList.join("\\n") : "記録なし";
       const blob = new Blob([header + body], { type: "text/plain" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -263,7 +250,6 @@
       URL.revokeObjectURL(url);
     };
 
-    // イベント登録
     window.addEventListener("load", () => {
       setupTimer();
       startBtn.addEventListener("click", startTimer);
@@ -271,7 +257,6 @@
       wrapBtn.addEventListener("click", addWrap);
     });
 
-    // 秒クリックで強制ブロック切り替え
     secondsLbl.addEventListener("click", () => {
       isManuallyBlocked = !isManuallyBlocked;
       if (isManuallyBlocked && timer) {
@@ -281,7 +266,6 @@
       }
     });
 
-    // 隠し画像の表示：時計3回クリックで切替
     let clickCount = 0;
     nowTimeLbl.addEventListener("click", () => {
       clickCount++;
