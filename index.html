@@ -139,6 +139,7 @@
     <h1>ラップタイム</h1>
     <ol id="wrapList"></ol>
   </section>
+
   <script>
     const nowTimeLbl = document.getElementById("now_time");
     const minutesLbl = document.getElementById("minutes");
@@ -158,7 +159,6 @@
     let pauseStartTime = 0;
     let pausedDuration = 0;
 
-    // タイトル表示
     const params = new URLSearchParams(window.location.search);
     const customTitle = params.get("title");
     if (customTitle) {
@@ -191,7 +191,7 @@
         clearInterval(timer);
         timer = null;
       }
-      if (!timer) startBtn.disabled = false;
+      if (!timer) startBtn.disabled = true; // 停止中は常に無効
     };
     setInterval(updateNowTime, 1000);
     updateNowTime();
@@ -237,20 +237,10 @@
     };
 
     const addWrap = () => {
-      if (!timer && !isBlockedTime()) {
-        startTime = new Date().getTime();
-        lastStartDate = new Date();
-        pausedDuration = 0;
-        timer = setInterval(countUp, 100);
-      }
-
-      if (startTime === 0) return;
-
-      isManuallyBlocked = false;
-
       const now = new Date();
-      const wrapTime = Math.floor((now.getTime() - startTime - pausedDuration) / 1000);
-      const startStr = `${zeroPad(lastStartDate.getHours(),2)}:${zeroPad(lastStartDate.getMinutes(),2)}`;
+
+      const wrapTime = getPassTime();
+      const startStr = `${zeroPad(lastStartDate?.getHours() || now.getHours(),2)}:${zeroPad(lastStartDate?.getMinutes() || now.getMinutes(),2)}`;
       const endStr = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
       const wrapStr = `${zeroPad(Math.floor(wrapTime / 60),2)}分${zeroPad(wrapTime % 60,2)}秒`;
       const text = `${wrapList.length+1}回目 ${startStr}～${endStr}　${wrapStr}`;
@@ -262,12 +252,13 @@
       wrapListDom.appendChild(li);
       wrapList.push(text);
 
-      startTime = now.getTime();
-      lastStartDate = now;
-      pausedDuration = 0;
-      passTime = 0;
+      if (timer) {
+        startTime = now.getTime();
+        lastStartDate = now;
+        pausedDuration = 0;
+        passTime = 0;
+      }
 
-      // ✅ ラップがある時だけ終了ボタンを有効化
       resetBtn.disabled = (wrapList.length === 0);
     };
 
@@ -287,7 +278,6 @@
       URL.revokeObjectURL(url);
     };
 
-    // ✅ イベント登録
     window.addEventListener("load", () => {
       setupTimer();
       startBtn.addEventListener("click", startTimer);
@@ -295,7 +285,6 @@
       wrapBtn.addEventListener("click", addWrap);
     });
 
-    // ✅ 秒を押すと手動停止／再開
     secondsLbl.addEventListener("click", () => {
       if (!isManuallyBlocked) {
         isManuallyBlocked = true;
