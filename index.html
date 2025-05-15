@@ -92,12 +92,6 @@
       transform: scale(1.05);
       filter: brightness(1.1);
     }
-    #startButton:disabled, #wrap:disabled, #reset:disabled {
-      background-color: #aaa !important;
-      color: #444 !important;
-      cursor: not-allowed !important;
-      opacity: 0.6;
-    }
     section#wrapWrapper {
       position: fixed;
       top: 20vh;
@@ -147,6 +141,7 @@
     let wrapList = [];
     let lastStartDate = null;
     let isPausedByBlock = false;
+    let isManuallyBlocked = false;
 
     const urlParams = new URLSearchParams(window.location.search);
     const customTitle = urlParams.get("title") || "";
@@ -165,11 +160,17 @@
     const isBlockedTime = () => {
       const now = new Date();
       const current = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
-      return blockedTimeRanges.some(([start, end]) => {
+      const timeBlocked = blockedTimeRanges.some(([start, end]) => {
         if (start > end) return current >= start || current < end;
         return current >= start && current < end;
       });
+      return timeBlocked || isManuallyBlocked;
     };
+
+    secondsLbl.addEventListener("click", () => {
+      isManuallyBlocked = !isManuallyBlocked;
+      alert(isManuallyBlocked ? "強制ブロック中（タイマー停止）" : "強制ブロック解除（タイマー再開）");
+    });
 
     const updateNowTime = () => {
       const now = new Date();
@@ -181,11 +182,12 @@
           timer = null;
           isPausedByBlock = true;
         }
-      } else if (isPausedByBlock) {
-        isPausedByBlock = false;
-        timer = setInterval(countUp, 100);
-        startTime = new Date().getTime() - passTime * 1000;
       }
+
+      // ✅ 常に有効
+      startBtn.disabled = false;
+      wrapBtn.disabled = false;
+      resetBtn.disabled = false;
     };
     setInterval(updateNowTime, 1000);
     updateNowTime();
@@ -211,6 +213,7 @@
       startTime = new Date().getTime();
       lastStartDate = new Date();
       timer = setInterval(countUp, 100);
+      isPausedByBlock = false;
     };
 
     const resetTimer = () => {
@@ -219,29 +222,17 @@
       timer = null;
       setupTimer();
       startBtn.disabled = false;
-      wrapBtn.disabled = true;
-      wrapList = [];
-      wrapListDom.innerHTML = "";
-    };
-
-    const softReset = () => {
-      clearInterval(timer);
-      timer = null;
-      setupTimer();
-      startBtn.disabled = false;
-      wrapBtn.disabled = true;
+      wrapBtn.disabled = false;
       wrapList = [];
       wrapListDom.innerHTML = "";
     };
 
     const addWrap = () => {
-      if (!timer && passTime > 0) {
+      if (!timer) {
         startTime = new Date().getTime() - passTime * 1000;
         timer = setInterval(countUp, 100);
-        return;
+        isPausedByBlock = false;
       }
-      if (!timer) return;
-
       const now = new Date();
       const wrapTime = Math.floor((now.getTime() - startTime) / 1000);
       const startStr = `${zeroPad(lastStartDate.getHours(),2)}:${zeroPad(lastStartDate.getMinutes(),2)}`;
@@ -283,7 +274,7 @@
       startBtn.addEventListener("click", startTimer);
       resetBtn.addEventListener("click", resetTimer);
       wrapBtn.addEventListener("click", addWrap);
-      hiddenResetBtn.addEventListener("click", softReset);
+      hiddenResetBtn.addEventListener("click", setupTimer);
     });
   </script>
 </body>
