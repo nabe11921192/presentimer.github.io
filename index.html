@@ -31,23 +31,6 @@
       border-radius: 12px;
       background-color: rgba(255,255,255,0.1);
     }
-    #reset {
-      position: fixed;
-      bottom: 10vh;
-      left: 2vw;
-      font-size: 2.5vh;
-      padding: 0.7vh 1.5vw;
-      z-index: 10;
-      background-color: #aa3a5e;
-      color: #ccc;
-      border: none;
-    }
-    button:disabled {
-      background-color: #444 !important;
-      color: #999 !important;
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
     section#main {
       flex: 1;
       display: flex;
@@ -67,16 +50,16 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 4vw;
+      gap: 2vw;
       margin-bottom: 6vh;
     }
-    #startButton, #wrap {
+    button {
       font-size: 2.4vh;
       padding: 1.2vh 2.4vw;
       border-radius: 8px;
       border: none;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      transition: background-color 0.2s, transform 0.1s, filter 0.2s;
+      transition: all 0.2s ease;
       cursor: pointer;
     }
     #wrap {
@@ -92,9 +75,19 @@
       background-color: #fafafa;
       color: #263238;
     }
-    #startButton:hover, #reset:hover, #wrap:hover {
-      transform: scale(1.05);
-      filter: brightness(1.1);
+    #resetButton {
+      background-color: #607d8b;
+      color: white;
+    }
+    #endButton {
+      background-color: #e91e63;
+      color: white;
+    }
+    button:disabled {
+      background-color: #444 !important;
+      color: #999 !important;
+      cursor: not-allowed;
+      opacity: 0.6;
     }
     section#wrapWrapper {
       position: fixed;
@@ -130,7 +123,8 @@
   </section>
 
   <section id="controller">
-    <button id="reset" disabled>作業終了(END)</button>
+    <button id="endButton" disabled>作業終了(END)</button>
+    <button id="resetButton">リセット</button>
     <button id="startButton">開始</button>
     <button id="wrap" disabled>ラップ</button>
   </section>
@@ -145,7 +139,8 @@
     const minutesLbl = document.getElementById("minutes");
     const secondsLbl = document.getElementById("seconds");
     const startBtn = document.getElementById("startButton");
-    const resetBtn = document.getElementById("reset");
+    const resetBtn = document.getElementById("resetButton");
+    const endBtn = document.getElementById("endButton");
     const wrapBtn = document.getElementById("wrap");
     const wrapListDom = document.getElementById("wrapList");
     const titleArea = document.getElementById("title_area");
@@ -183,6 +178,20 @@
       }) || isManuallyBlocked;
     };
 
+    const getPassTime = () => {
+      const now = new Date().getTime();
+      if (isManuallyBlocked && pauseStartTime) {
+        return Math.floor((pauseStartTime - startTime - pausedDuration) / 1000);
+      }
+      return Math.floor((now - startTime - pausedDuration) / 1000);
+    };
+
+    const countUp = () => {
+      passTime = getPassTime();
+      minutesLbl.innerText = zeroPad(Math.floor(passTime / 60), 3);
+      secondsLbl.innerText = zeroPad(passTime % 60, 2);
+    };
+
     const updateNowTime = () => {
       const now = new Date();
       nowTimeLbl.innerText = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}:${zeroPad(now.getSeconds(),2)}`;
@@ -193,8 +202,10 @@
         timer = null;
       }
 
-      // ✅ 修正：未開始かつブロック中以外のときだけ開始ボタンを有効化
-      startBtn.disabled = !(startTime === 0 && !isBlockedTime());
+      startBtn.disabled = !(
+        (startTime === 0 && !isBlockedTime()) ||
+        (isManuallyBlocked && startTime !== 0)
+      );
     };
     setInterval(updateNowTime, 1000);
     updateNowTime();
@@ -207,22 +218,17 @@
       wrapList = [];
       wrapListDom.innerHTML = "";
       startTime = 0;
-      resetBtn.disabled = true;
-    };
-
-    const getPassTime = () => {
-      const now = new Date().getTime();
-      return Math.floor((now - startTime - pausedDuration) / 1000);
-    };
-
-    const countUp = () => {
-      passTime = getPassTime();
-      minutesLbl.innerText = zeroPad(Math.floor(passTime / 60), 3);
-      secondsLbl.innerText = zeroPad(passTime % 60, 2);
+      endBtn.disabled = true;
     };
 
     const startTimer = () => {
-      if (timer || isBlockedTime()) return;
+      if (timer || (isBlockedTime() && !isManuallyBlocked)) return;
+
+      if (isManuallyBlocked) {
+        pausedDuration += new Date().getTime() - pauseStartTime;
+        isManuallyBlocked = false;
+      }
+
       startTime = new Date().getTime();
       lastStartDate = new Date();
       timer = setInterval(countUp, 100);
@@ -230,12 +236,17 @@
       wrapBtn.disabled = false;
     };
 
-    const resetTimer = () => {
-      if (wrapList.length > 0) downloadMemo();
+    const resetTimerOnly = () => {
       clearInterval(timer);
       timer = null;
       setupTimer();
       wrapBtn.disabled = true;
+      startBtn.disabled = false;
+    };
+
+    const resetTimerAndDownload = () => {
+      if (wrapList.length > 0) downloadMemo();
+      resetTimerOnly();
     };
 
     const addWrap = () => {
@@ -253,14 +264,24 @@
       wrapListDom.appendChild(li);
       wrapList.push(text);
 
-      if (timer) {
+      endBtn.disabled = (wrapList.length === 0);
+
+      if (!timer && (isManuallyBlocked || isBlockedTime())) {
+        if (isManuallyBlocked) {
+          pausedDuration += new Date().getTime() - pauseStartTime;
+          isManuallyBlocked = false;
+        }
+        startTime = new Date().getTime();
+        lastStartDate = new Date();
+        pausedDuration = 0;
+        passTime = 0;
+        timer = setInterval(countUp, 100);
+      } else if (timer) {
         startTime = now.getTime();
         lastStartDate = now;
         pausedDuration = 0;
         passTime = 0;
       }
-
-      resetBtn.disabled = (wrapList.length === 0);
     };
 
     const downloadMemo = () => {
@@ -282,7 +303,8 @@
     window.addEventListener("load", () => {
       setupTimer();
       startBtn.addEventListener("click", startTimer);
-      resetBtn.addEventListener("click", resetTimer);
+      resetBtn.addEventListener("click", resetTimerOnly);
+      endBtn.addEventListener("click", resetTimerAndDownload);
       wrapBtn.addEventListener("click", addWrap);
     });
 
