@@ -33,7 +33,7 @@
     }
     #resetButton {
       position: fixed;
-      top: 1vh; left: 1vw;
+      top: 1vh; right: 1vw;
       width: 3vw; height: 5vh;
       background-color: #1c252b;
       border: none;
@@ -126,7 +126,6 @@
   <p id="title_area"></p>
   <p id="now_time">--:--:--</p>
   <button id="resetButton" aria-label="reset"></button>
-
   <section id="main">
     <p id="timer">
       <span id="minutes">000</span><span class="unit">分</span>
@@ -191,7 +190,7 @@
 
     const getPassTime = () => {
       const now = new Date().getTime();
-      if (isManuallyBlocked && pauseStartTime) {
+      if (pauseStartTime && isManuallyBlocked) {
         return Math.floor((pauseStartTime - startTime - pausedDuration) / 1000);
       }
       return Math.floor((now - startTime - pausedDuration) / 1000);
@@ -206,13 +205,13 @@
     const updateNowTime = () => {
       const now = new Date();
       nowTimeLbl.innerText = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}:${zeroPad(now.getSeconds(),2)}`;
+
       if (isBlockedTime() && timer) {
         pauseStartTime = new Date().getTime();
         clearInterval(timer);
         timer = null;
       }
 
-      // ✅ 開始ボタンは「startTime === 0」で未開始状態なら常に有効
       startBtn.disabled = !(startTime === 0);
     };
     setInterval(updateNowTime, 1000);
@@ -220,12 +219,15 @@
     const setupTimer = () => {
       passTime = 0;
       pausedDuration = 0;
+      pauseStartTime = 0;
+      isManuallyBlocked = false;
       minutesLbl.innerText = zeroPad(0, 3);
       secondsLbl.innerText = zeroPad(0, 2);
       wrapList = [];
       wrapListDom.innerHTML = "";
       startTime = 0;
       endBtn.disabled = true;
+      wrapBtn.disabled = true;
     };
 
     const startTimer = () => {
@@ -241,7 +243,6 @@
       clearInterval(timer);
       timer = null;
       setupTimer();
-      wrapBtn.disabled = true;
       startBtn.disabled = false;
     };
 
@@ -266,12 +267,9 @@
       wrapList.push(text);
       endBtn.disabled = false;
 
-      // 再スタート処理
       if (!timer && (isManuallyBlocked || isBlockedTime())) {
-        if (isManuallyBlocked) {
-          pausedDuration += new Date().getTime() - pauseStartTime;
-          isManuallyBlocked = false;
-        }
+        pausedDuration += new Date().getTime() - pauseStartTime;
+        isManuallyBlocked = false;
         startTime = new Date().getTime();
         lastStartDate = new Date();
         pausedDuration = 0;
