@@ -133,18 +133,15 @@
       <span id="seconds">00</span><span class="unit">秒</span>
     </p>
   </section>
-
   <section id="controller">
     <button id="endButton" disabled>作業終了(END)</button>
     <button id="startButton">開始</button>
     <button id="wrap" disabled>ラップ</button>
   </section>
-
   <section id="wrapWrapper">
     <h1>ラップタイム</h1>
     <ol id="wrapList"></ol>
   </section>
-
   <script>
     const nowTimeLbl = document.getElementById("now_time");
     const minutesLbl = document.getElementById("minutes");
@@ -220,10 +217,17 @@
       const now = new Date();
       nowTimeLbl.innerText = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}:${zeroPad(now.getSeconds(),2)}`;
 
-      if (isBlockedTime() && timer) {
-        pauseStartTime = new Date().getTime();
-        clearInterval(timer);
-        timer = null;
+      if (isBlockedTime()) {
+        if (timer) {
+          pauseStartTime = new Date().getTime();
+          clearInterval(timer);
+          timer = null;
+        }
+      } else {
+        if (!timer && startTime !== 0) {
+          pausedDuration += new Date().getTime() - pauseStartTime;
+          timer = setInterval(countUp, 100);
+        }
       }
 
       startBtn.disabled = !(startTime === 0);
