@@ -40,6 +40,7 @@
       border: none;
       opacity: 0.7;
       z-index: 5;
+      text-indent: -9999px;
     }
     #reset:hover {
       opacity: 0.95;
@@ -62,10 +63,10 @@
     }
     section#controller {
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       gap: 4vw;
-      margin-bottom: 6vh;
+      margin: 0 0 6vh 4vw;
     }
     button {
       font-size: 2.4vh;
@@ -170,7 +171,7 @@
     const zeroPad = (num, digits) => String(num).padStart(digits, "0");
 
     const blockedTimeRanges = [
-      ["10:15", "10:25"], ["12:15", "13:00"], ["15:00", "15:10"],["09:10", "09:12"],
+      ["10:15", "10:25"], ["12:15", "13:00"], ["15:00", "15:10"], ["09:15", "0:17"],
       ["17:10", "17:20"], ["19:20", "19:30"], ["22:15", "22:25"],
       ["00:15", "01:00"], ["03:00", "03:10"], ["05:10", "05:20"], ["07:20", "07:30"]
     ];
