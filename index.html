@@ -32,7 +32,7 @@
       border-radius: 12px;
       background-color: rgba(255,255,255,0.1);
     }
-    #reset {
+    #resetButton {
       position: fixed;
       top: 1vh; right: 1vw;
       width: 3vw; height: 5vh;
@@ -40,9 +40,8 @@
       border: none;
       opacity: 0.7;
       z-index: 5;
-      text-indent: -9999px;
     }
-    #reset:hover {
+    #resetButton:hover {
       opacity: 0.95;
       cursor: pointer;
     }
@@ -63,10 +62,10 @@
     }
     section#controller {
       display: flex;
-      justify-content: flex-start;
+      justify-content: center;
       align-items: center;
       gap: 4vw;
-      margin: 0 0 6vh 4vw;
+      margin-bottom: 6vh;
     }
     button {
       font-size: 2.4vh;
@@ -90,9 +89,11 @@
       background-color: #fafafa;
       color: #263238;
     }
-    #end {
+    #endButton {
       background-color: #e91e63;
       color: white;
+      position: absolute;
+      left: 2vw;
     }
     button:disabled {
       background-color: #444 !important;
@@ -125,7 +126,7 @@
 <body>
   <p id="title_area"></p>
   <p id="now_time">--:--:--</p>
-  <button id="reset" aria-label="reset">リセット</button>
+  <button id="resetButton" aria-label="reset"></button>
   <section id="main">
     <p id="timer">
       <span id="minutes">000</span><span class="unit">分</span>
@@ -133,7 +134,7 @@
     </p>
   </section>
   <section id="controller">
-    <button id="end" disabled>作業終了(END)</button>
+    <button id="endButton" disabled>作業終了(END)</button>
     <button id="startButton">開始</button>
     <button id="wrap" disabled>ラップ</button>
   </section>
@@ -146,8 +147,8 @@
     const minutesLbl = document.getElementById("minutes");
     const secondsLbl = document.getElementById("seconds");
     const startBtn = document.getElementById("startButton");
-    const resetBtn = document.getElementById("reset");
-    const endBtn = document.getElementById("end");
+    const resetBtn = document.getElementById("resetButton");
+    const endBtn = document.getElementById("endButton");
     const wrapBtn = document.getElementById("wrap");
     const wrapListDom = document.getElementById("wrapList");
     const titleArea = document.getElementById("title_area");
@@ -168,17 +169,30 @@
       document.title = customTitle;
     }
 
+    titleArea.addEventListener("click", () => {
+      const newTitle = prompt("新しいタイトルを入力してください：", titleArea.textContent);
+      if (newTitle && newTitle.trim() !== "") {
+        customTitle = newTitle;
+        titleArea.textContent = customTitle;
+        document.title = customTitle;
+        const newParams = new URLSearchParams(window.location.search);
+        newParams.set("title", customTitle);
+        const newUrl = `${window.location.pathname}?${newParams.toString()}`;
+        window.history.replaceState(null, "", newUrl);
+      }
+    });
+
     const zeroPad = (num, digits) => String(num).padStart(digits, "0");
 
     const blockedTimeRanges = [
-      ["10:15", "10:25"], ["12:15", "13:00"], ["15:00", "15:10"], ["09:15", "0:17"],
+      ["10:15", "10:25"], ["12:15", "13:00"], ["15:00", "15:10"],["08:20", "08:30"],
       ["17:10", "17:20"], ["19:20", "19:30"], ["22:15", "22:25"],
       ["00:15", "01:00"], ["03:00", "03:10"], ["05:10", "05:20"], ["07:20", "07:30"]
     ];
 
     const isBlockedTime = () => {
       const now = new Date();
-      const current = ${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)};
+      const current = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
       return blockedTimeRanges.some(([start, end]) => {
         if (start > end) return current >= start || current < end;
         return current >= start && current < end;
@@ -201,7 +215,7 @@
 
     const updateNowTime = () => {
       const now = new Date();
-      nowTimeLbl.innerText = ${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}:${zeroPad(now.getSeconds(),2)};
+      nowTimeLbl.innerText = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}:${zeroPad(now.getSeconds(),2)}`;
 
       if (isBlockedTime()) {
         if (timer) {
@@ -259,10 +273,10 @@
     const addWrap = () => {
       const now = new Date();
       const wrapTime = getPassTime();
-      const startStr = ${zeroPad(lastStartDate?.getHours() || now.getHours(),2)}:${zeroPad(lastStartDate?.getMinutes() || now.getMinutes(),2)};
-      const endStr = ${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)};
-      const wrapStr = ${zeroPad(Math.floor(wrapTime / 60),2)}分${zeroPad(wrapTime % 60,2)}秒;
-      const text = ${wrapList.length+1}回目 ${startStr}～${endStr}　${wrapStr};
+      const startStr = `${zeroPad(lastStartDate?.getHours() || now.getHours(),2)}:${zeroPad(lastStartDate?.getMinutes() || now.getMinutes(),2)}`;
+      const endStr = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
+      const wrapStr = `${zeroPad(Math.floor(wrapTime / 60),2)}分${zeroPad(wrapTime % 60,2)}秒`;
+      const text = `${wrapList.length+1}回目 ${startStr}～${endStr}　${wrapStr}`;
 
       const li = document.createElement("li");
       li.className = "wrap_item";
@@ -290,10 +304,10 @@
 
     const downloadMemo = () => {
       const now = new Date();
-      const dateStr = ${zeroPad(now.getFullYear(),4)}${zeroPad(now.getMonth()+1,2)}${zeroPad(now.getDate(),2)}_${zeroPad(now.getHours(),2)}${zeroPad(now.getMinutes(),2)}${zeroPad(now.getSeconds(),2)};
+      const dateStr = `${zeroPad(now.getFullYear(),4)}${zeroPad(now.getMonth()+1,2)}${zeroPad(now.getDate(),2)}_${zeroPad(now.getHours(),2)}${zeroPad(now.getMinutes(),2)}${zeroPad(now.getSeconds(),2)}`;
       const titleSafe = (customTitle || "記録").replace(/[^a-zA-Z0-9一-龯_]/g, "_");
-      const fileName = ${titleSafe}_ラップタイム_${dateStr}.txt;
-      const header = 【${customTitle || "ラップタイム"} 記録】\n\n;
+      const fileName = `${titleSafe}_ラップタイム_${dateStr}.txt`;
+      const header = `【${customTitle || "ラップタイム"} 記録】\n\n`;
       const body = wrapList.join("\n");
       const blob = new Blob([header + body], { type: "text/plain" });
       const url = URL.createObjectURL(blob);
