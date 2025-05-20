@@ -1,3 +1,4 @@
+<!-- index.html（完全版）1/2 -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -142,6 +143,7 @@
     <h1>ラップタイム</h1>
     <ol id="wrapList"></ol>
   </section>
+<!-- index.html（完全版）2/2 -->
   <script>
     const nowTimeLbl = document.getElementById("now_time");
     const minutesLbl = document.getElementById("minutes");
@@ -270,12 +272,37 @@
       resetTimerOnly();
     };
 
+    const getBlockedDuration = (start, end) => {
+      let total = 0;
+      for (const [from, to] of blockedTimeRanges) {
+        const [fh, fm] = from.split(":").map(Number);
+        const [th, tm] = to.split(":").map(Number);
+        let fromTime = new Date(start);
+        fromTime.setHours(fh, fm, 0, 0);
+        let toTime = new Date(start);
+        toTime.setHours(th, tm, 0, 0);
+        if (from > to) toTime.setDate(toTime.getDate() + 1);
+        if (end > fromTime && start < toTime) {
+          const overlapStart = Math.max(start.getTime(), fromTime.getTime());
+          const overlapEnd = Math.min(end.getTime(), toTime.getTime());
+          total += Math.max(0, overlapEnd - overlapStart);
+        }
+      }
+      return total;
+    };
+
     const addWrap = () => {
       const now = new Date();
-      const wrapTime = getPassTime();
-      const startStr = `${zeroPad(lastStartDate?.getHours() || now.getHours(),2)}:${zeroPad(lastStartDate?.getMinutes() || now.getMinutes(),2)}`;
-      const endStr = `${zeroPad(now.getHours(),2)}:${zeroPad(now.getMinutes(),2)}`;
+      const wrapEnd = now;
+      const wrapStart = lastStartDate ? lastStartDate : wrapEnd;
+
+      const blocked = getBlockedDuration(wrapStart, wrapEnd);
+      const wrapTime = Math.floor((wrapEnd - wrapStart - blocked) / 1000);
+
+      const startStr = `${zeroPad(wrapStart.getHours(),2)}:${zeroPad(wrapStart.getMinutes(),2)}`;
+      const endStr = `${zeroPad(wrapEnd.getHours(),2)}:${zeroPad(wrapEnd.getMinutes(),2)}`;
       const wrapStr = `${zeroPad(Math.floor(wrapTime / 60),2)}分${zeroPad(wrapTime % 60,2)}秒`;
+
       const text = `${wrapList.length+1}回目 ${startStr}～${endStr}　${wrapStr}`;
 
       const li = document.createElement("li");
