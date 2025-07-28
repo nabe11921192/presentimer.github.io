@@ -53,9 +53,12 @@
       font-weight: bold;
       border: 2px solid #fdd835;
     }
-    #startButton {
-      background-color: #fafafa;
-      color: #263238;
+   #startButton {
+  background-color: #fafafa;
+  color: #263238;
+  font-size: 3.6vh;
+  padding: 2.4vh 2.4vw;
+}
     }
     #startButton:hover, #reset:hover, #wrap:hover {
       transform: scale(1.05);
